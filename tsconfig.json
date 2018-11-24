@@ -16,6 +16,14 @@
     "lib": [
       "es2018",
       "dom"
-    ]
+    ],
+    "paths": {
+      "tickets-data-layer/*": [
+        "src/app/data-layer/*"
+      ],
+      "tickets-data-layer": [
+        "src/app/data-layer"
+      ]
+    }
   }
 }

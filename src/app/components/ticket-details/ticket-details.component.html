@@ -1,0 +1,28 @@
+<h3>Details</h3>
+
+<div *ngIf="loading$ | async">Loading...</div>
+<div>
+  <div>
+    <strong>Id: </strong>
+    {{ (ticket$ | async)?.id }}
+  </div>
+
+  <div>
+    <strong>Description: </strong>
+    {{ (ticket$ | async)?.description }}
+  </div>
+
+  <div>
+    <strong>Asignee: </strong>ID: {{ (user$ | async)?.id }} | Name: {{ (user$ | async)?.name }}
+  </div>
+
+  <div>
+    <strong>Completed: </strong>{{ (ticket$ | async)?.completed }}
+  </div>
+</div>
+
+<div>
+  <button>Mark as Complete [WIP]</button>
+  <button>Reassign [WIP]</button>
+  <button>Unassign [WIP]</button>
+</div>

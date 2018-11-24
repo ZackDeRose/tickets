@@ -1,0 +1,52 @@
+<h3>List</h3>
+
+<div *ngIf="loading$ | async">Loading...</div>
+
+<table cdk-table [dataSource]="tableData$">
+
+  <ng-container cdkColumnDef="id">
+    <th cdk-header-cell *cdkHeaderCellDef>
+      id
+    </th>
+    <td cdk-cell *cdkCellDef="let row">
+      <a [routerLink]="'/ticket-details/' + row.id">
+        {{row.id}}
+      </a>
+    </td>
+  </ng-container>
+
+  <ng-container cdkColumnDef="description">
+    <th cdk-header-cell *cdkHeaderCellDef>
+      description
+    </th>
+    <td cdk-cell *cdkCellDef="let row">
+      {{row.description}}
+    </td>
+  </ng-container>
+
+  <ng-container cdkColumnDef="user">
+    <th cdk-header-cell *cdkHeaderCellDef>
+      user
+    </th>
+    <td cdk-cell *cdkCellDef="let row">
+      {{row.user}}
+    </td>
+  </ng-container>
+
+  <ng-container cdkColumnDef="completed">
+    <th cdk-header-cell *cdkHeaderCellDef>
+      completed
+    </th>
+    <td cdk-cell *cdkCellDef="let row">
+      {{row.completed}}
+    </td>
+  </ng-container>
+
+  <tr cdk-header-row *cdkHeaderRowDef="columns"></tr>
+  <tr cdk-row *cdkRowDef="let row; columns: columns"></tr>
+
+</table>
+
+<!-- <pre>{{ tableData$ | async | json }}</pre>
+<pre>{{ users$ | async | json }}</pre>
+<pre>{{ tickets$ | async | json }}</pre> -->
