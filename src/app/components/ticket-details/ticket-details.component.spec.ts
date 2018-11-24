@@ -1,5 +1,4 @@
 import { AppModule } from './../../app.module';
-import { DataLayerModule } from './../../data-layer/data-layer.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TicketDetailsComponent } from './ticket-details.component';
@@ -10,10 +9,7 @@ describe('TicketDetailsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      // declarations: [ TicketDetailsComponent ],
-      imports: [
-        AppModule
-      ]
+      imports: [ AppModule ]
     })
     .compileComponents();
   }));

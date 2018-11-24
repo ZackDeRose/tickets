@@ -44,8 +44,7 @@ export function ticketReducer(state = initialTicketState, action: TicketActions)
       return adapter.upsertMany(
         action.loadedData,
         {
-          // ...adapter.removeAll(state), // in case tickets have been deleted since last load
-          ...state,
+          ...adapter.removeAll(state), // in case tickets have been deleted since last load
           loading: false,
           loaded: true
         }

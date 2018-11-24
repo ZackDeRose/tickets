@@ -23,6 +23,9 @@
       ],
       "tickets-data-layer": [
         "src/app/data-layer"
+      ],
+      "testing-utils": [
+        "src/testing/utils"
       ]
     }
   }
