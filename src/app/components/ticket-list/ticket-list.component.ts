@@ -49,6 +49,10 @@ const tableDataSelector = createSelector(
   }
 );
 
+/**
+ * NOTE: Blurs on transitioning out; root cause seems to be identified here:
+ * https://github.com/angular/material2/issues/8057
+ */
 @Component({
   selector: 'app-ticket-list',
   templateUrl: './ticket-list.component.html',

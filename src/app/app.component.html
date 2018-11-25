@@ -1,5 +1,7 @@
 <div style="text-align:center;">
   <h2>Tickets</h2>
 
-  <router-outlet></router-outlet>
+  <main [@routerTransition]="getState(o)">
+    <router-outlet #o="outlet"></router-outlet>
+  </main>
 </div>

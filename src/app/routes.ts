@@ -10,11 +10,13 @@ export const routes: Routes = [
   },
   {
     path: 'ticket-list',
-    component: TicketListComponent
+    component: TicketListComponent,
+    data: { state: 'list' }
   },
   {
     path: 'ticket-details/:id',
-    component: TicketDetailsComponent
+    component: TicketDetailsComponent,
+    data: { state: 'details' }
   },
   {
     path: '**/**',
