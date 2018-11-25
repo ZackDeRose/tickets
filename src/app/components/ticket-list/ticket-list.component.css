@@ -4,3 +4,10 @@ table {
   margin-left: auto;
   margin-right: auto;
 }
+
+.table-progress{
+  width: 500px;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}

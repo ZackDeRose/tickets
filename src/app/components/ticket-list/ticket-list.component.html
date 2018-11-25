@@ -1,11 +1,11 @@
-<h3>List</h3>
-
 <div *ngIf="loading$ | async">Loading...</div>
-
+<mat-progress-bar
+  *ngIf="loading$ | async"
+  mode="determinate"
+  value="50"
+  class="table-progress">
+</mat-progress-bar>
 <table mat-table [dataSource]="tableData$" class="mat-elevation-z8">
-
-  
-
   <ng-container matColumnDef="id">
     <th mat-header-cell *matHeaderCellDef>
       id

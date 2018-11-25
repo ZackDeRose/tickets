@@ -1,28 +1,31 @@
-<h3>Details</h3>
-
-<div *ngIf="loading$ | async">Loading...</div>
-<div>
-  <div>
-    <strong>Id: </strong>
-    {{ (ticket$ | async)?.id }}
-  </div>
-
-  <div>
-    <strong>Description: </strong>
-    {{ (ticket$ | async)?.description }}
-  </div>
-
-  <div>
-    <strong>Asignee: </strong>ID: {{ (user$ | async)?.id }} | Name: {{ (user$ | async)?.name }}
-  </div>
-
-  <div>
-    <strong>Completed: </strong>{{ (ticket$ | async)?.completed }}
-  </div>
-</div>
-
-<div>
-  <button>Mark as Complete [WIP]</button>
-  <button>Reassign [WIP]</button>
-  <button>Unassign [WIP]</button>
-</div>
+<mat-card class="detail-card">
+  <mat-card-header>
+    <div mat-card-avatar class="avatar">
+      <mat-progress-spinner 
+        *ngIf="loading$ | async; else completedIcon"
+        mode="indeterminate"
+        diameter="40">
+      </mat-progress-spinner>
+      <ng-template #completedIcon>
+        <mat-icon class="avatar-icon" [svgIcon]="(ticket$ | async)?.completed ? 'checked-box' : 'un-checked-box'"></mat-icon>
+      </ng-template>
+    </div>
+    <mat-card-title>Ticket Details</mat-card-title>
+    <mat-card-subtitle *ngIf="ticket$ | async">ID: {{ (ticket$ | async).id }}</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <p *ngIf="user$ | async">
+      <strong>Assigned To: </strong>
+      {{ (user$ | async).name }} 
+      <button mat-icon-button color="primary">
+        <mat-icon svgIcon="edit"></mat-icon>
+      </button>
+    </p>
+    <p *ngIf="ticket$ | async"><strong>Description: </strong> {{ (ticket$ | async).description }}</p>
+  </mat-card-content>
+  <mat-card-actions>
+    <button *ngIf="ticket$ | async" mat-raised-button color="primary" class="complete-button">
+      Mark As {{ (ticket$ | async).completed ? 'Incomplete' : 'Complete' }}
+    </button>
+  </mat-card-actions>
+</mat-card>

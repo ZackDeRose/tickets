@@ -1,3 +1,5 @@
+import { DomSanitizer } from '@angular/platform-browser';
+import { MatIconRegistry } from '@angular/material';
 import { Component, OnInit } from '@angular/core';
 import { Observable, combineLatest } from 'rxjs';
 import { map, switchMap, filter } from 'rxjs/operators';
@@ -25,7 +27,16 @@ export class TicketDetailsComponent implements OnInit {
   user$: Observable<User>;
   loading$: Observable<boolean>;
 
-  constructor(private store$: Store<any>, private route: ActivatedRoute) { }
+  constructor(
+    private store$: Store<any>,
+    private route: ActivatedRoute,
+    iconRegistry: MatIconRegistry,
+    sanitizer: DomSanitizer
+  ) {
+    iconRegistry.addSvgIcon('checked-box', sanitizer.bypassSecurityTrustResourceUrl('assets/checked-box.svg'));
+    iconRegistry.addSvgIcon('un-checked-box', sanitizer.bypassSecurityTrustResourceUrl('assets/un-checked-box.svg'));
+    iconRegistry.addSvgIcon('edit', sanitizer.bypassSecurityTrustResourceUrl('assets/edit.svg'));
+  }
 
   ngOnInit() {
     this.ticket$ = this.route.paramMap.pipe(
