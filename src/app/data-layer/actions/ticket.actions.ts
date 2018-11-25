@@ -8,6 +8,15 @@ export enum TicketActionTypes {
   RequestAdd = '[Backend API] Ticket Request Add',
   AddSuccess = '[Backend API] Ticket Add Success',
   AddError = '[Backend API] Ticket Add Error',
+  RequestAssign = '[Backend API] Ticket Request Assign',
+  AssignSuccess = '[Backend API] Ticket Assign Success',
+  AssignError = '[Backend API] Ticket Assign Error',
+  RequestComplete = '[Backend API] Ticket Request Complete',
+  CompleteSuccess = '[Backend API] Ticket Complete Success',
+  CompleteError = '[Backend API] Ticket Complete Error',
+  RequestLoadSingle = '[Backend API] Ticket Request Load Single',
+  LoadSingleSuccess = '[Backend API] Ticket Load Single Success',
+  LoadSingleError = '[Backend API] Ticket Load Single Error'
 }
 
 export class TicketRequestLoad implements Action {
@@ -34,10 +43,66 @@ export class TicketRequestAdd implements Action {
 
 export class TicketAddSuccess implements Action {
   readonly type = TicketActionTypes.AddSuccess;
+
+  constructor(public added: Ticket) {}
 }
 
 export class TicketAddError implements Action {
   readonly type = TicketActionTypes.AddError;
+
+  constructor(public error: Error) {}
+}
+
+export class TicketRequestAssign implements Action {
+  readonly type = TicketActionTypes.RequestAssign;
+
+  constructor(public ticketId: number, public userId: number) {}
+}
+
+export class TicketAssignSuccess implements Action {
+  readonly type = TicketActionTypes.AssignSuccess;
+
+  constructor(public assigned: Ticket) {}
+}
+
+export class TicketAssignError implements Action {
+  readonly type = TicketActionTypes.AssignError;
+
+  constructor(public error: Error) {}
+}
+
+export class TicketRequestComplete implements Action {
+  readonly type = TicketActionTypes.RequestComplete;
+
+  constructor(public ticketId: number, public completed: boolean) {}
+}
+
+export class TicketCompleteSuccess implements Action {
+  readonly type = TicketActionTypes.CompleteSuccess;
+
+  constructor(public completed: Ticket) {}
+}
+
+export class TicketCompleteError implements Action {
+  readonly type = TicketActionTypes.CompleteError;
+
+  constructor(public error: Error) {}
+}
+
+export class TicketRequestLoadSingle implements Action {
+  readonly type = TicketActionTypes.RequestLoadSingle;
+
+  constructor(public id: number) {}
+}
+
+export class TicketLoadSingleSuccess implements Action {
+  readonly type = TicketActionTypes.LoadSingleSuccess;
+
+  constructor(public loadedData: Ticket) {}
+}
+
+export class TicketLoadSingleError implements Action {
+  readonly type = TicketActionTypes.LoadSingleError;
 
   constructor(public error: Error) {}
 }
@@ -48,4 +113,13 @@ export type TicketActions =
   | TicketLoadError
   | TicketRequestAdd
   | TicketAddSuccess
-  | TicketAddError;
+  | TicketAddError
+  | TicketRequestAssign
+  | TicketAssignSuccess
+  | TicketAssignError
+  | TicketRequestComplete
+  | TicketCompleteSuccess
+  | TicketCompleteError
+  | TicketRequestLoadSingle
+  | TicketLoadSingleSuccess
+  | TicketLoadSingleError;

@@ -5,9 +5,9 @@ export enum UserActionTypes {
   RequestLoad = '[Backend API] User Request Load',
   LoadSuccess = '[Backend API] User Load Success',
   LoadError = '[Backend API] User Load Error',
-  RequestAdd = '[Backend API] User Request Add',
-  AddSuccess = '[Backend API] User Add Success',
-  AddError = '[Backend API] User Add Error',
+  RequestLoadSingle = '[Backend API] User Request Load Single',
+  LoadSingleError = '[Backend API] User Load Single Error',
+  LoadSingleSuccess = '[Backend API] User Load Single Success',
 }
 
 export class UserRequestLoad implements Action {
@@ -26,18 +26,20 @@ export class UserLoadError implements Action {
   constructor(public error: Error) {}
 }
 
-export class UserRequestAdd implements Action {
-  readonly type = UserActionTypes.RequestAdd;
+export class UserRequestLoadSingle implements Action {
+  readonly type = UserActionTypes.RequestLoadSingle;
 
-  constructor(public description: string) {}
+  constructor(public userId: number) {}
 }
 
-export class UserAddSuccess implements Action {
-  readonly type = UserActionTypes.AddSuccess;
+export class UserLoadSingleSuccess implements Action {
+  readonly type = UserActionTypes.LoadSingleSuccess;
+
+  constructor(public user: User) {}
 }
 
-export class UserAddError implements Action {
-  readonly type = UserActionTypes.AddError;
+export class UserLoadSingleError implements Action {
+  readonly type = UserActionTypes.LoadSingleError;
 
   constructor(public error: Error) {}
 }
@@ -46,6 +48,6 @@ export type UserActions =
   UserRequestLoad
   | UserLoadSuccess
   | UserLoadError
-  | UserRequestAdd
-  | UserAddSuccess
-  | UserAddError;
+  | UserRequestLoadSingle
+  | UserLoadSingleSuccess
+  | UserLoadSingleError;

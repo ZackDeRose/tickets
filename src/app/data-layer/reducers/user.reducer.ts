@@ -41,15 +41,14 @@ export function userReducer(state = initialUserState, action: UserActions): User
     }
 
     case UserActionTypes.LoadSuccess: {
-      return adapter.upsertMany(
-        action.loadedData,
-        {
-          // ...adapter.removeAll(state), // in case Users have been deleted since last load
-          ...state,
-          loading: false,
-          loaded: true
-        }
-      );
+      return {
+        ...adapter.upsertMany(
+          action.loadedData,
+          adapter.removeAll(state) // in case Users have been deleted since last load
+        ),
+        loading: false,
+        loaded: true
+      };
     }
 
     case UserActionTypes.LoadError: {
@@ -61,23 +60,23 @@ export function userReducer(state = initialUserState, action: UserActions): User
       };
     }
 
-    case UserActionTypes.RequestAdd: {
+    case UserActionTypes.RequestLoadSingle: {
       return {
         ...state,
-        submitting: true,
-        submitted: false
+        loading: true,
+        loaded: false
       };
     }
 
-    case UserActionTypes.AddSuccess: {
+    case UserActionTypes.LoadSingleSuccess: {
       return {
-        ...state,
-        submitting: false,
-        submitted: true
+        ...adapter.upsertOne(action.user, state),
+        loading: false,
+        loaded: true
       };
     }
 
-    case UserActionTypes.AddError: {
+    case UserActionTypes.LoadSingleError: {
       return {
         ...state,
         submitting: false,

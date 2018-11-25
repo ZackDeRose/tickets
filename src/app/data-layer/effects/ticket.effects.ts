@@ -6,10 +6,13 @@ import {
   TicketAddSuccess,
   TicketAddError,
   TicketRequestAdd,
-  TicketRequestLoad
+  TicketRequestLoad,
+  TicketLoadSingleSuccess,
+  TicketLoadSingleError,
+  TicketRequestLoadSingle
 } from '../actions/ticket.actions';
 import { Observable, of } from 'rxjs';
-import { switchMap, map } from 'rxjs/operators';
+import { switchMap, map, catchError } from 'rxjs/operators';
 import { Effect, Actions, ofType } from '@ngrx/effects';
 import { BackendService } from '../../backend.service';
 
@@ -18,24 +21,58 @@ export class TicketEffects {
   @Effect()
   loadEffect$: Observable<TicketLoadSuccess | TicketLoadError> = this.actions$.pipe(
     ofType(TicketActionTypes.RequestLoad),
-    switchMap(() => this.backendService.tickets().pipe(
-      map(tickets => new TicketLoadSuccess(tickets))
-    ))
-    // TODO: Handle errors???
+    switchMap(() => {
+      let toReturn: Observable<TicketLoadSuccess | TicketLoadError>;
+      try {
+        toReturn = this.backendService.tickets().pipe(
+          map(ticketsResponse => new TicketLoadSuccess(ticketsResponse)),
+        );
+      } catch (error) {
+        toReturn = of(new TicketLoadError(error));
+      }
+      return toReturn;
+    }),
+  );
+
+  @Effect()
+  loadSingleEffect$: Observable<TicketLoadSingleSuccess | TicketLoadSingleError> = this.actions$.pipe(
+    ofType(TicketActionTypes.RequestLoadSingle),
+    switchMap((action: TicketRequestLoadSingle) => {
+      let toReturn: Observable<TicketLoadSingleSuccess | TicketLoadSingleError>;
+      try {
+        toReturn = this.backendService.ticket(action.id).pipe(
+          map(ticket => new TicketLoadSingleSuccess(ticket))
+        );
+      } catch (error) {
+        toReturn = of(new TicketLoadSingleError(error));
+      }
+      return toReturn;
+    })
   );
 
   @Effect()
   addEffect$: Observable<TicketAddSuccess | TicketAddError> = this.actions$.pipe(
     ofType(TicketActionTypes.RequestAdd),
-    switchMap((action: TicketRequestAdd) => this.backendService.newTicket({ description: action.description }).pipe(
-      map(() => new TicketAddSuccess())
-    ))
-    // TODO: handle erros???
+    switchMap((action: TicketRequestAdd) => {
+      let toReturn: Observable<TicketAddSuccess | TicketAddError>;
+      try {
+        toReturn = this.backendService.newTicket({ description: action.description }).pipe(
+          map(ticket => new TicketAddSuccess(ticket))
+        );
+      } catch (error) {
+        toReturn = of(new TicketAddError(error));
+      }
+      return toReturn;
+    })
   );
 
   @Effect()
-  addSuccessTriggersLoad$: Observable<TicketRequestLoad> = this.actions$.pipe(
-    ofType(TicketActionTypes.AddSuccess),
+  triggerLoad$: Observable<TicketRequestLoad> = this.actions$.pipe(
+    ofType(
+      TicketActionTypes.AddSuccess,
+      TicketActionTypes.AssignSuccess,
+      TicketActionTypes.CompleteSuccess
+    ),
     map(() => new TicketRequestLoad())
   );
 

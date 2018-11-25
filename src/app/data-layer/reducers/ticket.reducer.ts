@@ -3,13 +3,12 @@ import { Ticket } from 'tickets-data-layer/models';
 import { TicketActions, TicketActionTypes } from 'tickets-data-layer/actions';
 import { createSelector } from '@ngrx/store';
 import { dataLayerSelector } from './data-layer.state';
+import { convertToR3QueryMetadata } from '../../../../node_modules/@angular/core/src/render3/jit/directive';
 
 const adapter = createEntityAdapter<Ticket>({
   selectId: ticket => ticket.id,
   sortComparer: false
 });
-
-type actions = TicketActions;
 
 export interface TicketState extends EntityState<Ticket> {
   loaded: boolean;
@@ -70,7 +69,7 @@ export function ticketReducer(state = initialTicketState, action: TicketActions)
 
     case TicketActionTypes.AddSuccess: {
       return {
-        ...state,
+        ...adapter.upsertOne(action.added, state),
         submitting: false,
         submitted: true
       };
@@ -81,6 +80,81 @@ export function ticketReducer(state = initialTicketState, action: TicketActions)
         ...state,
         submitting: false,
         submitted: false,
+        error: action.error.message
+      };
+    }
+
+    case TicketActionTypes.RequestAssign: {
+      return {
+        ...state,
+        submitting: true,
+        submitted: false,
+      };
+    }
+
+    case TicketActionTypes.AssignSuccess: {
+      return {
+        ...adapter.upsertOne(action.assigned, state),
+        submitting: false,
+        submitted: true
+      };
+    }
+
+    case TicketActionTypes.AssignError: {
+      return {
+        ...state,
+        submitting: false,
+        submitted: false,
+        error: action.error.message
+      };
+    }
+
+    case TicketActionTypes.RequestComplete: {
+      return {
+        ...state,
+        submitting: true,
+        submitted: false
+      };
+    }
+
+    case TicketActionTypes.CompleteSuccess: {
+      return {
+        ...adapter.upsertOne(action.completed, state),
+        submitting: false,
+        submitted: true
+      };
+    }
+
+    case TicketActionTypes.CompleteError: {
+      return {
+        ...state,
+        submitting: false,
+        submitted: false,
+        error: action.error.message
+      };
+    }
+
+    case TicketActionTypes.RequestLoadSingle: {
+      return {
+        ...state,
+        loading: true,
+        loaded: false,
+      };
+    }
+
+    case TicketActionTypes.LoadSingleSuccess: {
+      return {
+        ...adapter.upsertOne(action.loadedData, state),
+        loading: false,
+        loaded: true,
+      };
+    }
+
+    case TicketActionTypes.LoadSingleError: {
+      return {
+        ...state,
+        loading: false,
+        loaded: false,
         error: action.error.message
       };
     }

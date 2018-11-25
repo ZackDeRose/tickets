@@ -1,28 +1,36 @@
 import { DataLayerState } from 'tickets-data-layer/reducers';
 import { Ticket, User, TicketState, UserState } from 'tickets-data-layer';
-import { DictionaryNum } from '../../node_modules/@ngrx/entity/src/models';
+import { Dictionary } from '@ngrx/entity';
 
-export const createTicket: (Ticket) => Ticket = ({
+export const createTicket: (x?: Partial<Ticket>) => Ticket = ({
   id = 0,
   description = 'Canned test description',
   assigneeId = null,
   completed = false
-} = {}) => ({
+} = {
+  id,
+  description,
+  assigneeId,
+  completed
+}) => ({
   id,
   description,
   assigneeId,
   completed
 });
 
-export const createUser: (User) => User = ({
+export const createUser: (x?: User) => User = ({
   id = 0,
   name = 'Zack'
-} = {}) => ({
+} = {
+  id,
+  name
+}) => ({
   id,
   name
 });
 
-export const testTickets: DictionaryNum<Ticket> = {
+export const testTickets: Dictionary<Ticket> = {
   0: createTicket({ id: 0, description: 'Tickets App - Hiring Test', assigneeId: 0 }),
   1: createTicket({ id: 1, description: 'That Task No One Wants To Do' }),
   2: createTicket({ id: 2, description: 'Clean Room', assigneeId: 0, completed: true }),
@@ -56,7 +64,7 @@ export const createTicketState: (x?: TicketState) => TicketState = ({
   error
 });
 
-export const testUsers: DictionaryNum<User> = {
+export const testUsers: Dictionary<User> = {
   0: createUser({ id: 0, name: 'Zack' }), // wishful thinking!!
   1: createUser({ id: 1, name: 'Victor' }),
   2: createUser({ id: 2, name: 'Dan' }),

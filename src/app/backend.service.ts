@@ -87,7 +87,7 @@ export class BackendService {
       return of(foundTicket).pipe(
         delay(randomDelay()),
         tap((ticket: Ticket) => {
-          ticket.completed = true;
+          ticket.completed = completed; // ZackDeRose: changed/fixed??
         })
       );
     }
