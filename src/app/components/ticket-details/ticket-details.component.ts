@@ -1,8 +1,9 @@
+import { TicketDetailsAlterCompleted, TicketDetailsInit } from './ticket-details.actions';
 import { DomSanitizer } from '@angular/platform-browser';
 import { MatIconRegistry } from '@angular/material';
 import { Component, OnInit } from '@angular/core';
 import { Observable, combineLatest } from 'rxjs';
-import { map, switchMap, filter } from 'rxjs/operators';
+import { map, switchMap, filter, take, tap } from 'rxjs/operators';
 import { Ticket, User } from 'tickets-data-layer';
 import { Store, select } from '@ngrx/store';
 import { ActivatedRoute } from '@angular/router';
@@ -26,6 +27,7 @@ export class TicketDetailsComponent implements OnInit {
   ticket$: Observable<Ticket>;
   user$: Observable<User>;
   loading$: Observable<boolean>;
+  submitting$: Observable<boolean>;
 
   constructor(
     private store$: Store<any>,
@@ -39,6 +41,12 @@ export class TicketDetailsComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.route.paramMap.pipe(
+      take(1),
+      map(params => params.get('id'))
+    )
+    .subscribe(id => this.store$.dispatch(new TicketDetailsInit(Number(id))));
+
     this.ticket$ = this.route.paramMap.pipe(
       map(params => params.get('id')),
       switchMap(id => this.store$.pipe(
@@ -63,10 +71,12 @@ export class TicketDetailsComponent implements OnInit {
     .pipe(
       map(arr => arr.some(x => !!x))
     );
+    this.submitting$ = this.store$.pipe(select(ticketsSubmitting));
+  }
 
-    // TODO: Replace with Page-level Actions
-    this.store$.dispatch(new TicketRequestLoad());
-    this.store$.dispatch(new UserRequestLoad());
+  async complete() {
+    const ticket = await this.ticket$.pipe(take(1)).toPromise();
+    this.store$.dispatch(new TicketDetailsAlterCompleted(ticket.id, !ticket.completed));
   }
 
 }

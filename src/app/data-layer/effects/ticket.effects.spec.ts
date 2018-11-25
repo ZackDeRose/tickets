@@ -13,7 +13,9 @@ import {
   TicketCompleteSuccess,
   TicketLoadSingleSuccess,
   TicketLoadSingleError,
-  TicketRequestLoadSingle
+  TicketRequestLoadSingle,
+  TicketRequestComplete,
+  TicketCompleteError
 } from 'tickets-data-layer/actions';
 import { Actions } from '@ngrx/effects';
 import { testTickets, createTicket } from 'testing-utils';
@@ -334,6 +336,83 @@ describe('Ticket Effects', () => {
       const effects = new TicketEffects(new Actions(source), service);
 
       expect(effects.loadSingleEffect$).toBeObservable(expected);
+    });
+
+  });
+
+  describe('completeEffect', () => {
+
+    it('should not emit anything if an unwatched action occurs', () => {
+      const source = cold('a-b-c', {
+        a: { type: TicketActionTypes.CompleteError},
+        b: { type: 'test action type'},
+        c: { name: 'this one is not even an action'}
+      });
+      const expected = cold('---', {});
+
+      const effects = new TicketEffects(new Actions(source), service);
+
+      expect(effects.completeEffect$).toBeObservable(expected);
+    });
+
+    it('should emit TicketCompleteSuccess on success', () => {
+      const ticket = createTicket();
+      const source = cold('a', { a: new TicketRequestComplete(ticket.id, !ticket.completed)});
+
+      service.complete.and.returnValue(of({ ...ticket, completed: !ticket.completed }));
+
+      const expected = cold('a', {
+        a: new TicketCompleteSuccess({ ...ticket, completed: !ticket.completed })
+      });
+
+      const effects = new TicketEffects(new Actions(source), service);
+
+      expect(effects.completeEffect$).toBeObservable(expected);
+    });
+
+    it('should emit TicketCompleteError on error', () => {
+      const ticket = createTicket();
+      const source = cold('a', { a: new TicketRequestComplete(ticket.id, !ticket.completed)});
+
+      const errorMsg = 'test Error';
+      const error = new Error(errorMsg);
+      service.complete.and.throwError(errorMsg);
+
+      const expected = cold('a', {
+        a: new TicketCompleteError(error)
+      });
+
+      const effects = new TicketEffects(new Actions(source), service);
+
+      expect(effects.completeEffect$).toBeObservable(expected);
+    });
+
+    it('should continue to emit after an error', () => {
+      const ticket = createTicket();
+      const source = cold('a-b', {
+        a: new TicketRequestComplete(ticket.id, !ticket.completed),
+        b: new TicketRequestComplete(ticket.id, !ticket.completed)
+      });
+
+      const errorMsg = 'test Error';
+      const error = new Error(errorMsg);
+      let count = 0;
+      service.complete.and.callFake(() => {
+        if (count === 0) {
+          count++;
+          throw error;
+        }
+        return of({ ...ticket, completed: !ticket.completed });
+      });
+
+      const expected = cold('a-b', {
+        a: new TicketCompleteError(error),
+        b: new TicketCompleteSuccess({ ...ticket, completed: !ticket.completed })
+      });
+
+      const effects = new TicketEffects(new Actions(source), service);
+
+      expect(effects.completeEffect$).toBeObservable(expected);
     });
 
   });

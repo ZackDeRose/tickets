@@ -20,6 +20,7 @@ import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { HttpClientModule } from '@angular/common/http';
+import { TicketDetailsEffects } from './components/ticket-details/ticket-details.effects';
 
 @NgModule({
   declarations: [
@@ -39,7 +40,9 @@ import { HttpClientModule } from '@angular/common/http';
     MatProgressBarModule,
     DataLayerModule,
     StoreModule.forRoot({}),
-    EffectsModule.forRoot([]),
+    EffectsModule.forRoot([
+      TicketDetailsEffects
+    ]),
     StoreDevtoolsModule.instrument({
       name: 'Ticket App',
       maxAge: 100

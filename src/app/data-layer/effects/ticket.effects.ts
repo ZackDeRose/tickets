@@ -9,10 +9,13 @@ import {
   TicketRequestLoad,
   TicketLoadSingleSuccess,
   TicketLoadSingleError,
-  TicketRequestLoadSingle
+  TicketRequestLoadSingle,
+  TicketCompleteSuccess,
+  TicketCompleteError,
+  TicketRequestComplete
 } from '../actions/ticket.actions';
 import { Observable, of } from 'rxjs';
-import { switchMap, map, catchError } from 'rxjs/operators';
+import { switchMap, map } from 'rxjs/operators';
 import { Effect, Actions, ofType } from '@ngrx/effects';
 import { BackendService } from '../../backend.service';
 
@@ -41,7 +44,7 @@ export class TicketEffects {
       let toReturn: Observable<TicketLoadSingleSuccess | TicketLoadSingleError>;
       try {
         toReturn = this.backendService.ticket(action.id).pipe(
-          map(ticket => new TicketLoadSingleSuccess(ticket))
+          map(ticket => new TicketLoadSingleSuccess(ticket)),
         );
       } catch (error) {
         toReturn = of(new TicketLoadSingleError(error));
@@ -74,6 +77,22 @@ export class TicketEffects {
       TicketActionTypes.CompleteSuccess
     ),
     map(() => new TicketRequestLoad())
+  );
+
+  @Effect()
+  completeEffect$: Observable<TicketCompleteSuccess | TicketCompleteError> = this.actions$.pipe(
+    ofType(TicketActionTypes.RequestComplete),
+    switchMap((action: TicketRequestComplete) => {
+      let toReturn: Observable<TicketCompleteSuccess | TicketCompleteError>;
+      try {
+        toReturn = this.backendService.complete(action.ticketId, action.completed).pipe(
+          map(ticket => new TicketCompleteSuccess(ticket))
+        );
+      } catch (error) {
+        toReturn = of(new TicketCompleteError(error));
+      }
+      return toReturn;
+    })
   );
 
   constructor(private actions$: Actions, private backendService: BackendService) {}

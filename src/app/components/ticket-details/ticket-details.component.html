@@ -24,7 +24,12 @@
     <p *ngIf="ticket$ | async"><strong>Description: </strong> {{ (ticket$ | async).description }}</p>
   </mat-card-content>
   <mat-card-actions>
-    <button *ngIf="ticket$ | async" mat-raised-button color="primary" class="complete-button">
+    <button *ngIf="ticket$ | async"
+            mat-raised-button
+            color="primary"
+            class="complete-button"
+            [disabled]="loading$ | async"
+            (click)="complete()">
       Mark As {{ (ticket$ | async).completed ? 'Incomplete' : 'Complete' }}
     </button>
   </mat-card-actions>
