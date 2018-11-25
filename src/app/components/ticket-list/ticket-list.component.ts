@@ -12,6 +12,8 @@ import {
   ticketsSubmitting
 } from 'tickets-data-layer';
 import { Observable, combineLatest } from 'rxjs';
+import { MatIconRegistry } from '@angular/material';
+import { DomSanitizer } from '@angular/platform-browser';
 
 export interface TicketTableModel {
   id: number;
@@ -24,7 +26,8 @@ const columns = [
   'id',
   'description',
   'user',
-  'completed'
+  'completed',
+  'link'
 ];
 
 const tableDataSelector = createSelector(
@@ -57,7 +60,9 @@ export class TicketListComponent implements OnInit {
   initialized = false;
   loading$: Observable<boolean>;
 
-  constructor(private store$: Store<any>) { }
+  constructor(private store$: Store<any>, iconRegistry: MatIconRegistry, sanitizer: DomSanitizer) {
+    iconRegistry.addSvgIcon('launch', sanitizer.bypassSecurityTrustResourceUrl('assets/launch.svg'));
+  }
 
   ngOnInit() {
     this.tableData$ = this.store$.pipe(
