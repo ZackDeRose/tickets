@@ -27,6 +27,12 @@
         <mat-icon svgIcon="edit"></mat-icon>
       </button>
     </p>
+    <p *ngIf="!(user$ | async) && !(userLoading$ | async)">
+      <strong>Currently Unassigned</strong>
+      <button mat-icon-button color="primary" (click)="openAssigneeDialog()">
+        <mat-icon svgIcon="edit"></mat-icon>
+      </button>
+    </p>
     <p *ngIf="ticket$ | async"><strong>Description: </strong> {{ (ticket$ | async).description }}</p>
   </mat-card-content>
   <mat-card-actions>

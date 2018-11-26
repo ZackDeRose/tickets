@@ -1,3 +1,4 @@
+import { TicketListEditAssignee } from './../ticket-list/ticket-list.actions';
 import { selectUserEntities } from './../../data-layer/reducers/user.reducer';
 import { map, take, switchMap, startWith, filter } from 'rxjs/operators';
 import { Actions, ofType } from '@ngrx/effects';
@@ -79,7 +80,7 @@ export class EditAssigneeDialogComponent implements OnInit {
     if (this.data.parent === 'details') {
       this.store$.dispatch(new TicketDetailsEditAssignee(this.data.ticketId, userId));
     } else if (this.data.parent === 'list') {
-      // TODO: add list capability to edit assignee
+      this.store$.dispatch(new TicketListEditAssignee(this.data.ticketId, userId));
     } else {
       this.store$.dispatch(new TicketRequestAssign(this.data.ticketId, userId));
     }

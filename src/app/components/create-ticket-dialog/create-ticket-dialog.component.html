@@ -1,0 +1,28 @@
+<form (submit)="submit()">
+  <h1 mat-dialog-title>Create New Ticket</h1>
+  <div mat-dialog-content>
+    <mat-form-field class="full-width">
+      <textarea
+        matInput 
+        placeholder="Ticket Description"
+        [formControl]="descriptionForm"
+        [cdkTextareaAutosize]="true">
+      </textarea>
+      <mat-hint>Enter the description for the Ticket you'd like to create</mat-hint>
+      <mat-error *ngIf="descriptionForm.hasError('required')">
+        Description is <strong>required</strong>
+      </mat-error>
+    </mat-form-field>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-raised-button type="submit" color="primary" [disabled]="!(canSubmit$ | async)">
+      Save
+      <mat-progress-bar 
+        *ngIf="submitting$ | async"
+        mode="indeterminate"
+        diameter="20">
+      </mat-progress-bar>
+    </button>
+    <button mat-raised-button type="button" (click)="cancel()">Cancel</button>
+  </div>
+</form>

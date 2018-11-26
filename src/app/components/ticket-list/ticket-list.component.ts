@@ -1,3 +1,6 @@
+import { EditAssigneeDialogComponent } from './../edit-assignee-dialog/edit-assignee-dialog.component';
+import { TicketListInit } from './ticket-list.actions';
+import { CreateTicketDialogComponent } from './../create-ticket-dialog/create-ticket-dialog.component';
 import { tap, map } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { Store, createSelector, select } from '@ngrx/store';
@@ -12,7 +15,7 @@ import {
   ticketsSubmitting
 } from 'tickets-data-layer';
 import { Observable, combineLatest } from 'rxjs';
-import { MatIconRegistry } from '@angular/material';
+import { MatIconRegistry, MatDialog } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
 
 export interface TicketTableModel {
@@ -64,8 +67,14 @@ export class TicketListComponent implements OnInit {
   initialized = false;
   loading$: Observable<boolean>;
 
-  constructor(private store$: Store<any>, iconRegistry: MatIconRegistry, sanitizer: DomSanitizer) {
+  constructor(
+    private store$: Store<any>,
+    iconRegistry: MatIconRegistry,
+    sanitizer: DomSanitizer,
+    private dialog: MatDialog
+  ) {
     iconRegistry.addSvgIcon('launch', sanitizer.bypassSecurityTrustResourceUrl('assets/launch.svg'));
+    iconRegistry.addSvgIcon('edit', sanitizer.bypassSecurityTrustResourceUrl('assets/edit.svg'));
   }
 
   ngOnInit() {
@@ -83,8 +92,27 @@ export class TicketListComponent implements OnInit {
       map(arr => arr.some(working => !!working))
     );
 
-    this.store$.dispatch(new TicketRequestLoad());
-    this.store$.dispatch(new UserRequestLoad());
+    this.store$.dispatch(new TicketListInit());
+  }
+
+  openCreateTicketDialog() {
+    this.dialog.open(
+      CreateTicketDialogComponent,
+      { width: '400px' }
+    );
+  }
+
+  openAssigneeDialog(ticketId: number) {
+    this.dialog.open(
+      EditAssigneeDialogComponent,
+      {
+        width: '250px',
+        data: {
+          ticketId,
+          parent: 'list'
+        }
+      }
+    );
   }
 
 }

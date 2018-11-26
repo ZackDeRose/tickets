@@ -1,3 +1,4 @@
+import { TicketListEffects } from './components/ticket-list/ticket-list.effects';
 import { DataLayerModule } from './data-layer/data-layer.module';
 import { BackendService } from './backend.service';
 import { BrowserModule } from '@angular/platform-browser';
@@ -16,7 +17,8 @@ import {
   MatProgressSpinnerModule,
   MatProgressBarModule,
   MatDialogModule,
-  MatSelectModule
+  MatSelectModule,
+  MatInputModule
 } from '@angular/material';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
@@ -25,13 +27,15 @@ import { HttpClientModule } from '@angular/common/http';
 import { TicketDetailsEffects } from './components/ticket-details/ticket-details.effects';
 import { EditAssigneeDialogComponent } from './components/edit-assignee-dialog/edit-assignee-dialog.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CreateTicketDialogComponent } from './components/create-ticket-dialog/create-ticket-dialog.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     TicketListComponent,
     TicketDetailsComponent,
-    EditAssigneeDialogComponent
+    EditAssigneeDialogComponent,
+    CreateTicketDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -47,10 +51,12 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     MatProgressBarModule,
     MatDialogModule,
     MatSelectModule,
+    MatInputModule,
     DataLayerModule,
     StoreModule.forRoot({}),
     EffectsModule.forRoot([
-      TicketDetailsEffects
+      TicketDetailsEffects,
+      TicketListEffects
     ]),
     StoreDevtoolsModule.instrument({
       name: 'Ticket App',
@@ -60,6 +66,9 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
   ],
   providers: [BackendService],
   bootstrap: [AppComponent],
-  entryComponents: [EditAssigneeDialogComponent]
+  entryComponents: [
+    EditAssigneeDialogComponent,
+    CreateTicketDialogComponent
+  ]
 })
 export class AppModule { }

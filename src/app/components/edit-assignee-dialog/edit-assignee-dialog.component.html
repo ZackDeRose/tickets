@@ -20,9 +20,3 @@
     <button mat-raised-button type="button" (click)="cancel()">Cancel</button>
   </div>
 </form>
-
-<pre>
-{{ ticket$ | async | json }}
-{{ userForm ? (userForm.value | json) : 'lol' }}
-{{ canSubmit$ | async }}
-</pre>

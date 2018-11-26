@@ -13,9 +13,7 @@ import {
   usersSubmitting,
   usersLoading,
   ticketsLoading,
-  ticketsSubmitting,
-  TicketRequestLoad,
-  UserRequestLoad
+  ticketsSubmitting
 } from 'tickets-data-layer';
 import { EditAssigneeDialogComponent } from '../edit-assignee-dialog/edit-assignee-dialog.component';
 
