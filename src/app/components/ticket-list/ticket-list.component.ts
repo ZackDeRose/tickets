@@ -59,6 +59,19 @@ export interface TableState {
   paging: PageEvent;
 }
 
+export const filteredTableData = (tableState: TableState) => createSelector(
+  tableDataSelector,
+  tableData => {
+    let temp = [...tableData];
+    if (tableState.globalFilter) {
+      temp = temp.filter(tableModel =>
+        Object.values(tableModel).some(v => v.toString().toLowerCase().includes(tableState.globalFilter.toLowerCase()))
+      );
+    }
+    return temp;
+  }
+);
+
 const sortByKey = <T>(keyname: keyof T, dir: SortDirection = 'asc') => (a: T, b: T) => {
   if (a[keyname].toString().toLowerCase() > b[keyname].toString().toLowerCase()) {
     return dir === 'asc' ? 1 : -1;
@@ -84,7 +97,6 @@ export const refinedTableData = (tableState: TableState) => createSelector(
     if (tableState.paging) {
       const startingIndex = tableState.paging.pageSize * tableState.paging.pageIndex;
       const endingIndex = Math.min(tableState.paging.length, startingIndex + tableState.paging.pageSize);
-      debugger;
       temp = temp.slice(startingIndex, endingIndex);
     }
     return temp;
@@ -105,6 +117,7 @@ export class TicketListComponent implements OnInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
   tableData$: Observable<TicketTableModel[]>;
+  filteredTableData$: Observable<TicketTableModel[]>;
   refinedTableData$: Observable<TicketTableModel[]>;
   columns = columns;
   initialized = false;
@@ -127,18 +140,27 @@ export class TicketListComponent implements OnInit {
 
   async ngOnInit() {
     this.tableData$ = this.store$.pipe(select(tableDataSelector));
+    this.filteredTableData$ = this.globalSearch.valueChanges.pipe(
+      startWith(this.globalSearch.value),
+      switchMap(searchTerm => this.store$.pipe(select(filteredTableData({ globalFilter: searchTerm } as TableState))))
+    );
     this.tableState$ = combineLatest(
       this.globalSearch.valueChanges.pipe(startWith(this.globalSearch.value)),
       this.sort.sortChange.pipe(startWith(({ active: this.sort.active, direction: this.sort.direction }))),
       this.paginator.page.pipe(
-        startWith( { pageSize: 5, pageIndex: 0, length: 5 })
-      )
+        startWith( { pageSize: 5, pageIndex: 0 })
+      ),
+      this.filteredTableData$.pipe(map(data => data.length))
     )
     .pipe(
-      map(([globalSearch, sort, page]) => ({
+      map(([globalSearch, sort, page, count]) => ({
         globalFilter: globalSearch as string,
         sort: sort,
-        paging: page as PageEvent
+        paging: {
+          pageSize: page.pageSize,
+          pageIndex: page.pageIndex,
+          length: count
+        },
       }))
     );
     this.refinedTableData$ = this.tableState$.pipe(

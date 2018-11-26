@@ -18,7 +18,7 @@ import {
   TicketAssignSuccess
 } from '../actions/ticket.actions';
 import { Observable, of } from 'rxjs';
-import { switchMap, map } from 'rxjs/operators';
+import { switchMap, map, concatMap, mergeMap } from 'rxjs/operators';
 import { Effect, Actions, ofType } from '@ngrx/effects';
 import { BackendService } from '../../backend.service';
 
@@ -75,9 +75,9 @@ export class TicketEffects {
   @Effect()
   triggerLoad$: Observable<TicketRequestLoad> = this.actions$.pipe(
     ofType(
-      TicketActionTypes.AddSuccess,
-      TicketActionTypes.AssignSuccess,
-      TicketActionTypes.CompleteSuccess
+      // TicketActionTypes.AddSuccess,
+      // TicketActionTypes.AssignSuccess,
+      // TicketActionTypes.CompleteSuccess
     ),
     map(() => new TicketRequestLoad())
   );
@@ -85,7 +85,7 @@ export class TicketEffects {
   @Effect()
   completeEffect$: Observable<TicketCompleteSuccess | TicketCompleteError> = this.actions$.pipe(
     ofType(TicketActionTypes.RequestComplete),
-    switchMap((action: TicketRequestComplete) => {
+    mergeMap((action: TicketRequestComplete) => {
       let toReturn: Observable<TicketCompleteSuccess | TicketCompleteError>;
       try {
         toReturn = this.backendService.complete(action.ticketId, action.completed).pipe(
@@ -101,7 +101,7 @@ export class TicketEffects {
   @Effect()
   assignEffect$: Observable<TicketAssignSuccess | TicketAssignError> = this.actions$.pipe(
     ofType(TicketActionTypes.RequestAssign),
-    switchMap((action: TicketRequestAssign) => {
+    mergeMap((action: TicketRequestAssign) => {
       let toReturn: Observable<TicketAssignSuccess | TicketAssignError>;
       try {
         toReturn = this.backendService.assign(action.ticketId, action.userId).pipe(
