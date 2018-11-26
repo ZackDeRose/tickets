@@ -1,5 +1,5 @@
 import { EditAssigneeDialogComponent } from './../edit-assignee-dialog/edit-assignee-dialog.component';
-import { TicketListInit } from './ticket-list.actions';
+import { TicketListInit, TicketListAlterCompleted } from './ticket-list.actions';
 import { CreateTicketDialogComponent } from './../create-ticket-dialog/create-ticket-dialog.component';
 import { tap, map } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
@@ -26,10 +26,9 @@ export interface TicketTableModel {
 }
 
 const columns = [
-  'id',
-  'description',
-  'user',
   'completed',
+  'user',
+  'description',
   'link'
 ];
 
@@ -66,6 +65,7 @@ export class TicketListComponent implements OnInit {
   columns = columns;
   initialized = false;
   loading$: Observable<boolean>;
+  submitting$: Observable<boolean>;
 
   constructor(
     private store$: Store<any>,
@@ -75,6 +75,8 @@ export class TicketListComponent implements OnInit {
   ) {
     iconRegistry.addSvgIcon('launch', sanitizer.bypassSecurityTrustResourceUrl('assets/launch.svg'));
     iconRegistry.addSvgIcon('edit', sanitizer.bypassSecurityTrustResourceUrl('assets/edit.svg'));
+    iconRegistry.addSvgIcon('checked-box', sanitizer.bypassSecurityTrustResourceUrl('assets/checked-box.svg'));
+    iconRegistry.addSvgIcon('un-checked-box', sanitizer.bypassSecurityTrustResourceUrl('assets/un-checked-box.svg'));
   }
 
   ngOnInit() {
@@ -91,8 +93,16 @@ export class TicketListComponent implements OnInit {
     .pipe(
       map(arr => arr.some(working => !!working))
     );
+    this.submitting$ = this.store$.pipe(select(ticketsSubmitting));
 
     this.store$.dispatch(new TicketListInit());
+  }
+
+  toggleCompleted(ticketId: number, completed: boolean) {
+    this.store$.dispatch(new TicketListAlterCompleted(
+      ticketId,
+      !completed
+    ));
   }
 
   openCreateTicketDialog() {

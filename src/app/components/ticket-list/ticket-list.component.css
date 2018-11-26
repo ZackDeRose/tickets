@@ -5,9 +5,13 @@ table {
   margin-right: auto;
 }
 
-.table-progress{
-  width: 500px;
+.table-progress {
+  width: 600px;
   text-align: center;
   margin-left: auto;
   margin-right: auto;
+}
+
+.spinner{
+  margin: 8px;
 }

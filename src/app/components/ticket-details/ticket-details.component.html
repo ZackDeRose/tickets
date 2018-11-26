@@ -13,7 +13,14 @@
         diameter="40">
       </mat-progress-spinner>
       <ng-template #completedIcon>
-        <mat-icon class="avatar-icon" [svgIcon]="(ticket$ | async)?.completed ? 'checked-box' : 'un-checked-box'"></mat-icon>
+        <button mat-icon-button (click)="complete()">
+          <mat-icon 
+            class="avatar-icon"
+            [svgIcon]="(ticket$ | async)?.completed ? 'checked-box' : 'un-checked-box'"
+            color="primary">
+          </mat-icon>
+        </button>
+        <!-- <mat-icon class="avatar-icon" [svgIcon]="(ticket$ | async)?.completed ? 'checked-box' : 'un-checked-box'"></mat-icon> -->
       </ng-template>
     </div>
     <mat-card-title>Ticket Details</mat-card-title>

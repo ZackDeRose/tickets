@@ -4,7 +4,8 @@ import { Action } from '@ngrx/store';
 export enum TicketListActionTypes {
   Init = '[TicketList] Init',
   CreateNew = '[TicketList] Create New',
-  EditAssignee = '[TicketList] Edit Assignee'
+  EditAssignee = '[TicketList] Edit Assignee',
+  AlterCompleted = '[TicketList] Edit Completed'
 }
 
 export class TicketListInit implements Action {
@@ -21,4 +22,10 @@ export class TicketListEditAssignee implements Action {
   readonly type = TicketListActionTypes.EditAssignee;
 
   constructor(public ticketId, public userId) {}
+}
+
+export class TicketListAlterCompleted implements Action {
+  readonly type = TicketListActionTypes.AlterCompleted;
+
+  constructor(public ticketId: number, public completed: boolean) {}
 }
