@@ -12,6 +12,6 @@ table {
   margin-right: auto;
 }
 
-.spinner{
-  margin: 8px;
+.global-search {
+  width: 600px;
 }

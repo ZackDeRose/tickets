@@ -1,12 +1,11 @@
+import { FormControl } from '@angular/forms';
 import { EditAssigneeDialogComponent } from './../edit-assignee-dialog/edit-assignee-dialog.component';
 import { TicketListInit, TicketListAlterCompleted } from './ticket-list.actions';
 import { CreateTicketDialogComponent } from './../create-ticket-dialog/create-ticket-dialog.component';
-import { tap, map } from 'rxjs/operators';
+import { tap, map, startWith, switchMap } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { Store, createSelector, select } from '@ngrx/store';
 import {
-  TicketRequestLoad,
-  UserRequestLoad,
   selectUserEntities,
   usersLoading,
   usersSubmitting,
@@ -32,7 +31,7 @@ const columns = [
   'link'
 ];
 
-const tableDataSelector = createSelector(
+export const tableDataSelector = createSelector(
   selectUserEntities,
   selectTicketEntities, // selectAllTickets might go better
   (users, tickets) => {
@@ -51,6 +50,23 @@ const tableDataSelector = createSelector(
   }
 );
 
+export interface TableState {
+  globalFilter: string;
+}
+
+export const filteredTableData = (tableState: TableState) => createSelector(
+  tableDataSelector,
+  tableData => {
+    let temp = [...tableData];
+    if (tableState.globalFilter) {
+      temp = temp.filter(tableModel =>
+        Object.values(tableModel).some(v => v.toString().toLowerCase().includes(tableState.globalFilter.toLowerCase()))
+      );
+    }
+    return temp;
+  }
+);
+
 /**
  * NOTE: Blurs on transitioning out; root cause seems to be identified here:
  * https://github.com/angular/material2/issues/8057
@@ -66,6 +82,8 @@ export class TicketListComponent implements OnInit {
   initialized = false;
   loading$: Observable<boolean>;
   submitting$: Observable<boolean>;
+  tableState$: Observable<TableState>;
+  globalSearch = new FormControl('');
 
   constructor(
     private store$: Store<any>,
@@ -80,9 +98,15 @@ export class TicketListComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.tableData$ = this.store$.pipe(
-      select(tableDataSelector),
-      tap(() => this.initialized = true)
+    this.tableState$ = this.globalSearch.valueChanges.pipe(
+      startWith(this.globalSearch.value),
+      map(searchTerm => ({ globalFilter: searchTerm }))
+    );
+    this.tableData$ = this.tableState$.pipe(
+      switchMap(tableState => this.store$.pipe(
+        select(filteredTableData(tableState)),
+        tap(() => this.initialized = true)
+      ))
     );
     this.loading$ = combineLatest(
       this.store$.pipe(select(ticketsLoading)),

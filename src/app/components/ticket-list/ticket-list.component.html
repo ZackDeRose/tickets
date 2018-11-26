@@ -1,3 +1,7 @@
+<mat-form-field class="global-search">
+  <input matInput [formControl]="globalSearch" placeholder="Filter">
+</mat-form-field>
+
 <mat-progress-bar
   *ngIf="loading$ | async"
   mode="indeterminate"
@@ -8,17 +12,17 @@
   <ng-container matColumnDef="completed">
     <th mat-header-cell *matHeaderCellDef>Complete</th>
     <td mat-cell *matCellDef="let row">
-      <!-- <mat-progress-spinner 
+      <mat-progress-spinner 
         *ngIf="(submitting$ | async); else completedIcon"
         mode="indeterminate"
         class="spinner"
         diameter="24">
       </mat-progress-spinner>
-      <ng-template #completedIcon> -->
+      <ng-template #completedIcon>
         <button mat-icon-button (click)="toggleCompleted(row.id, row.completed)">
           <mat-icon [svgIcon]="row.completed ? 'checked-box' : 'un-checked-box'" color="primary"></mat-icon>
         </button>
-      <!-- </ng-template> -->
+      </ng-template>
     </td>
   </ng-container>
 

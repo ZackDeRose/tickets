@@ -20,7 +20,6 @@
             color="primary">
           </mat-icon>
         </button>
-        <!-- <mat-icon class="avatar-icon" [svgIcon]="(ticket$ | async)?.completed ? 'checked-box' : 'un-checked-box'"></mat-icon> -->
       </ng-template>
     </div>
     <mat-card-title>Ticket Details</mat-card-title>
@@ -45,11 +44,8 @@
   <mat-card-actions>
     <button *ngIf="ticket$ | async"
             mat-raised-button
-            color="primary"
-            class="complete-button"
-            [disabled]="loading$ | async"
-            (click)="complete()">
-      Mark As {{ (ticket$ | async).completed ? 'Incomplete' : 'Complete' }}
+            routerLink="/ticket-list">
+      Back to Ticket List
     </button>
   </mat-card-actions>
 </mat-card>
