@@ -18,7 +18,8 @@ import {
   MatProgressBarModule,
   MatDialogModule,
   MatSelectModule,
-  MatInputModule
+  MatInputModule,
+  MatSortModule
 } from '@angular/material';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
@@ -52,6 +53,7 @@ import { CreateTicketDialogComponent } from './components/create-ticket-dialog/c
     MatDialogModule,
     MatSelectModule,
     MatInputModule,
+    MatSortModule,
     DataLayerModule,
     StoreModule.forRoot({}),
     EffectsModule.forRoot([

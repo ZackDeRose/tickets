@@ -3,7 +3,7 @@ import { EditAssigneeDialogComponent } from './../edit-assignee-dialog/edit-assi
 import { TicketListInit, TicketListAlterCompleted } from './ticket-list.actions';
 import { CreateTicketDialogComponent } from './../create-ticket-dialog/create-ticket-dialog.component';
 import { tap, map, startWith, switchMap } from 'rxjs/operators';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Store, createSelector, select } from '@ngrx/store';
 import {
   selectUserEntities,
@@ -14,7 +14,7 @@ import {
   ticketsSubmitting
 } from 'tickets-data-layer';
 import { Observable, combineLatest } from 'rxjs';
-import { MatIconRegistry, MatDialog } from '@angular/material';
+import { MatIconRegistry, MatDialog, MatSort, SortDirection } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
 
 export interface TicketTableModel {
@@ -52,9 +52,23 @@ export const tableDataSelector = createSelector(
 
 export interface TableState {
   globalFilter: string;
+  sort: {
+    active: string,
+    direction: '' | 'asc' | 'desc'
+  };
 }
 
-export const filteredTableData = (tableState: TableState) => createSelector(
+const sortByKey = <T>(keyname: keyof T, dir: SortDirection = 'asc') => (a: T, b: T) => {
+  if (a[keyname].toString().toLowerCase() > b[keyname].toString().toLowerCase()) {
+    return dir === 'asc' ? 1 : -1;
+  }
+  if (a[keyname].toString().toLowerCase() < b[keyname].toString().toLowerCase()) {
+    return dir === 'asc' ? -1 : 1;
+  }
+  return 0;
+};
+
+export const refinedTableData = (tableState: TableState) => createSelector(
   tableDataSelector,
   tableData => {
     let temp = [...tableData];
@@ -62,6 +76,9 @@ export const filteredTableData = (tableState: TableState) => createSelector(
       temp = temp.filter(tableModel =>
         Object.values(tableModel).some(v => v.toString().toLowerCase().includes(tableState.globalFilter.toLowerCase()))
       );
+    }
+    if (tableState.sort && tableState.sort.active) {
+      temp = temp.sort(sortByKey(tableState.sort.active as keyof TicketTableModel, tableState.sort.direction));
     }
     return temp;
   }
@@ -77,6 +94,8 @@ export const filteredTableData = (tableState: TableState) => createSelector(
   styleUrls: ['./ticket-list.component.css']
 })
 export class TicketListComponent implements OnInit {
+  @ViewChild(MatSort) sort: MatSort;
+
   tableData$: Observable<TicketTableModel[]>;
   columns = columns;
   initialized = false;
@@ -98,13 +117,19 @@ export class TicketListComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.tableState$ = this.globalSearch.valueChanges.pipe(
-      startWith(this.globalSearch.value),
-      map(searchTerm => ({ globalFilter: searchTerm }))
+    this.tableState$ = combineLatest(
+      this.globalSearch.valueChanges.pipe(startWith(this.globalSearch.value)),
+      this.sort.sortChange.pipe(startWith(({ active: this.sort.active, direction: this.sort.direction })))
+    )
+    .pipe(
+      map(([globalSearch, sort]) => ({
+        globalFilter: globalSearch as string,
+        sort: sort
+      }))
     );
     this.tableData$ = this.tableState$.pipe(
       switchMap(tableState => this.store$.pipe(
-        select(filteredTableData(tableState)),
+        select(refinedTableData(tableState)),
         tap(() => this.initialized = true)
       ))
     );
