@@ -12,7 +12,10 @@ import {
   TicketRequestLoadSingle,
   TicketCompleteSuccess,
   TicketCompleteError,
-  TicketRequestComplete
+  TicketRequestComplete,
+  TicketAssignError,
+  TicketRequestAssign,
+  TicketAssignSuccess
 } from '../actions/ticket.actions';
 import { Observable, of } from 'rxjs';
 import { switchMap, map } from 'rxjs/operators';
@@ -90,6 +93,22 @@ export class TicketEffects {
         );
       } catch (error) {
         toReturn = of(new TicketCompleteError(error));
+      }
+      return toReturn;
+    })
+  );
+
+  @Effect()
+  assignEffect$: Observable<TicketAssignSuccess | TicketAssignError> = this.actions$.pipe(
+    ofType(TicketActionTypes.RequestAssign),
+    switchMap((action: TicketRequestAssign) => {
+      let toReturn: Observable<TicketAssignSuccess | TicketAssignError>;
+      try {
+        toReturn = this.backendService.assign(action.ticketId, action.userId).pipe(
+          map(ticket => new TicketAssignSuccess(ticket)),
+        );
+      } catch (error) {
+        toReturn = of(new TicketAssignError(error));
       }
       return toReturn;
     })

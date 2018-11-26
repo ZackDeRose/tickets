@@ -26,7 +26,10 @@ export class BackendService {
     }
   ];
 
-  storedUsers: User[] = [{ id: 111, name: 'Victor' }];
+  storedUsers: User[] = [
+    { id: 111, name: 'Victor' },
+    { id: 0, name: 'Zack' }
+  ]; // ZackDeRose: added another user to make interesting
 
   lastId = 1;
 

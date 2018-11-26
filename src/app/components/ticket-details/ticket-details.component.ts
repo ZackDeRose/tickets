@@ -1,6 +1,6 @@
 import { TicketDetailsAlterCompleted, TicketDetailsInit } from './ticket-details.actions';
 import { DomSanitizer } from '@angular/platform-browser';
-import { MatIconRegistry } from '@angular/material';
+import { MatIconRegistry, MatDialog } from '@angular/material';
 import { Component, OnInit } from '@angular/core';
 import { Observable, combineLatest } from 'rxjs';
 import { map, switchMap, filter, take, tap } from 'rxjs/operators';
@@ -17,6 +17,7 @@ import {
   TicketRequestLoad,
   UserRequestLoad
 } from 'tickets-data-layer';
+import { EditAssigneeDialogComponent } from '../edit-assignee-dialog/edit-assignee-dialog.component';
 
 @Component({
   selector: 'app-ticket-details',
@@ -33,7 +34,8 @@ export class TicketDetailsComponent implements OnInit {
     private store$: Store<any>,
     private route: ActivatedRoute,
     iconRegistry: MatIconRegistry,
-    sanitizer: DomSanitizer
+    sanitizer: DomSanitizer,
+    private dialog: MatDialog
   ) {
     iconRegistry.addSvgIcon('checked-box', sanitizer.bypassSecurityTrustResourceUrl('assets/checked-box.svg'));
     iconRegistry.addSvgIcon('un-checked-box', sanitizer.bypassSecurityTrustResourceUrl('assets/un-checked-box.svg'));
@@ -43,7 +45,7 @@ export class TicketDetailsComponent implements OnInit {
   ngOnInit() {
     this.route.paramMap.pipe(
       take(1),
-      map(params => params.get('id'))
+      map(params => params.get('id')),
     )
     .subscribe(id => this.store$.dispatch(new TicketDetailsInit(Number(id))));
 
@@ -77,6 +79,19 @@ export class TicketDetailsComponent implements OnInit {
   async complete() {
     const ticket = await this.ticket$.pipe(take(1)).toPromise();
     this.store$.dispatch(new TicketDetailsAlterCompleted(ticket.id, !ticket.completed));
+  }
+
+  async openAssigneeDialog() {
+    this.dialog.open(
+      EditAssigneeDialogComponent,
+      {
+        width: '250px',
+        data: {
+          ticketId: await this.ticket$.pipe(take(1), map(ticket => ticket.id)).toPromise(),
+          parent: 'details'
+        }
+      }
+    );
   }
 
 }

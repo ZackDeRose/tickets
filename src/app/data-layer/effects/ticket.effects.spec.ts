@@ -15,10 +15,12 @@ import {
   TicketLoadSingleError,
   TicketRequestLoadSingle,
   TicketRequestComplete,
-  TicketCompleteError
+  TicketCompleteError,
+  TicketRequestAssign,
+  TicketAssignError
 } from 'tickets-data-layer/actions';
 import { Actions } from '@ngrx/effects';
-import { testTickets, createTicket } from 'testing-utils';
+import { testTickets, createTicket, createUser } from 'testing-utils';
 import { of } from 'rxjs';
 
 describe('Ticket Effects', () => {
@@ -413,6 +415,88 @@ describe('Ticket Effects', () => {
       const effects = new TicketEffects(new Actions(source), service);
 
       expect(effects.completeEffect$).toBeObservable(expected);
+    });
+
+  });
+
+  describe('assignEffect', () => {
+
+    it('should not emit anything if an unwatched action occurs', () => {
+      const source = cold('a-b-c', {
+        a: { type: TicketActionTypes.AssignError},
+        b: { type: 'test action type'},
+        c: { name: 'this one is not even an action'}
+      });
+      const expected = cold('---', {});
+
+      const effects = new TicketEffects(new Actions(source), service);
+
+      expect(effects.assignEffect$).toBeObservable(expected);
+    });
+
+    it('should emit TicketAssignSuccess on success', () => {
+      const ticket = createTicket();
+      const user = createUser();
+      const source = cold('a', { a: new TicketRequestAssign(ticket.id, user.id)});
+      const assignedTicket = { ...ticket, assigneeId: user.id };
+
+      service.assign.and.returnValue(of(assignedTicket));
+
+      const expected = cold('a', {
+        a: new TicketAssignSuccess(assignedTicket)
+      });
+
+      const effects = new TicketEffects(new Actions(source), service);
+
+      expect(effects.assignEffect$).toBeObservable(expected);
+    });
+
+    it('should emit TicketAssignError on error', () => {
+      const ticket = createTicket();
+      const user = createUser();
+      const source = cold('a', { a: new TicketRequestAssign(ticket.id, user.id)});
+
+      const errorMsg = 'test Error';
+      const error = new Error(errorMsg);
+      service.assign.and.throwError(errorMsg);
+
+      const expected = cold('a', {
+        a: new TicketAssignError(error)
+      });
+
+      const effects = new TicketEffects(new Actions(source), service);
+
+      expect(effects.assignEffect$).toBeObservable(expected);
+    });
+
+    it('should continue to emit after an error', () => {
+      const ticket = createTicket();
+      const user = createUser();
+      const source = cold('a-b', {
+        a: new TicketRequestAssign(ticket.id, user.id),
+        b: new TicketRequestAssign(ticket.id, user.id)
+      });
+      const assignedTicket = { ...ticket, assigneeId: user.id };
+
+      const errorMsg = 'test Error';
+      const error = new Error(errorMsg);
+      let count = 0;
+      service.assign.and.callFake(() => {
+        if (count === 0) {
+          count++;
+          throw error;
+        }
+        return of(assignedTicket);
+      });
+
+      const expected = cold('a-b', {
+        a: new TicketAssignError(error),
+        b: new TicketAssignSuccess(assignedTicket)
+      });
+
+      const effects = new TicketEffects(new Actions(source), service);
+
+      expect(effects.assignEffect$).toBeObservable(expected);
     });
 
   });

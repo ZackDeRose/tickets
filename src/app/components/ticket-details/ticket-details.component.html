@@ -1,8 +1,14 @@
+<mat-progress-bar
+  *ngIf="loading$ | async"
+  mode="indeterminate"
+  value="50"
+  class="card-progress">
+</mat-progress-bar>
 <mat-card class="detail-card">
   <mat-card-header>
     <div mat-card-avatar class="avatar">
       <mat-progress-spinner 
-        *ngIf="loading$ | async; else completedIcon"
+        *ngIf="(submitting$ | async) || !(ticket$ | async); else completedIcon"
         mode="indeterminate"
         diameter="40">
       </mat-progress-spinner>
@@ -17,7 +23,7 @@
     <p *ngIf="user$ | async">
       <strong>Assigned To: </strong>
       {{ (user$ | async).name }} 
-      <button mat-icon-button color="primary">
+      <button mat-icon-button color="primary" (click)="openAssigneeDialog()">
         <mat-icon svgIcon="edit"></mat-icon>
       </button>
     </p>

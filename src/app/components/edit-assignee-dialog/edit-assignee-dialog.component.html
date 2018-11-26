@@ -1,0 +1,28 @@
+<form (submit)="submit()">
+  <h1 mat-dialog-title>Edit Assignee</h1>
+  <div mat-dialog-content>
+    <mat-form-field *ngIf="userForm">
+      <mat-select placeholder="Assignee" [formControl]="userForm">
+        <!-- <mat-option [value]="-1">-- Unassigned --</mat-option> API Doesn't allow for unassigning assigned ticket -->
+        <mat-option *ngFor="let user of (userOptions$ | async)" [value]="user">{{ user.name }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-raised-button type="submit" color="primary" [disabled]="!(canSubmit$ | async)">
+      Save
+      <mat-progress-bar 
+        *ngIf="submitting$ | async"
+        mode="indeterminate"
+        diameter="20">
+      </mat-progress-bar>
+    </button>
+    <button mat-raised-button type="button" (click)="cancel()">Cancel</button>
+  </div>
+</form>
+
+<pre>
+{{ ticket$ | async | json }}
+{{ userForm ? (userForm.value | json) : 'lol' }}
+{{ canSubmit$ | async }}
+</pre>

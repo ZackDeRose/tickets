@@ -1,7 +1,6 @@
-<div *ngIf="loading$ | async">Loading...</div>
 <mat-progress-bar
   *ngIf="loading$ | async"
-  mode="determinate"
+  mode="indeterminate"
   value="50"
   class="table-progress">
 </mat-progress-bar>
