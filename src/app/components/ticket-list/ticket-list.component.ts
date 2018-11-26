@@ -2,7 +2,7 @@ import { FormControl } from '@angular/forms';
 import { EditAssigneeDialogComponent } from './../edit-assignee-dialog/edit-assignee-dialog.component';
 import { TicketListInit, TicketListAlterCompleted } from './ticket-list.actions';
 import { CreateTicketDialogComponent } from './../create-ticket-dialog/create-ticket-dialog.component';
-import { tap, map, startWith, switchMap } from 'rxjs/operators';
+import { tap, map, startWith, switchMap, take } from 'rxjs/operators';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Store, createSelector, select } from '@ngrx/store';
 import {
@@ -14,7 +14,7 @@ import {
   ticketsSubmitting
 } from 'tickets-data-layer';
 import { Observable, combineLatest } from 'rxjs';
-import { MatIconRegistry, MatDialog, MatSort, SortDirection } from '@angular/material';
+import { MatIconRegistry, MatDialog, MatSort, SortDirection, PageEvent, MatPaginator } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
 
 export interface TicketTableModel {
@@ -56,6 +56,7 @@ export interface TableState {
     active: string,
     direction: '' | 'asc' | 'desc'
   };
+  paging: PageEvent;
 }
 
 const sortByKey = <T>(keyname: keyof T, dir: SortDirection = 'asc') => (a: T, b: T) => {
@@ -80,6 +81,12 @@ export const refinedTableData = (tableState: TableState) => createSelector(
     if (tableState.sort && tableState.sort.active) {
       temp = temp.sort(sortByKey(tableState.sort.active as keyof TicketTableModel, tableState.sort.direction));
     }
+    if (tableState.paging) {
+      const startingIndex = tableState.paging.pageSize * tableState.paging.pageIndex;
+      const endingIndex = Math.min(tableState.paging.length, startingIndex + tableState.paging.pageSize);
+      debugger;
+      temp = temp.slice(startingIndex, endingIndex);
+    }
     return temp;
   }
 );
@@ -95,8 +102,10 @@ export const refinedTableData = (tableState: TableState) => createSelector(
 })
 export class TicketListComponent implements OnInit {
   @ViewChild(MatSort) sort: MatSort;
+  @ViewChild(MatPaginator) paginator: MatPaginator;
 
   tableData$: Observable<TicketTableModel[]>;
+  refinedTableData$: Observable<TicketTableModel[]>;
   columns = columns;
   initialized = false;
   loading$: Observable<boolean>;
@@ -116,18 +125,23 @@ export class TicketListComponent implements OnInit {
     iconRegistry.addSvgIcon('un-checked-box', sanitizer.bypassSecurityTrustResourceUrl('assets/un-checked-box.svg'));
   }
 
-  ngOnInit() {
+  async ngOnInit() {
+    this.tableData$ = this.store$.pipe(select(tableDataSelector));
     this.tableState$ = combineLatest(
       this.globalSearch.valueChanges.pipe(startWith(this.globalSearch.value)),
-      this.sort.sortChange.pipe(startWith(({ active: this.sort.active, direction: this.sort.direction })))
+      this.sort.sortChange.pipe(startWith(({ active: this.sort.active, direction: this.sort.direction }))),
+      this.paginator.page.pipe(
+        startWith( { pageSize: 5, pageIndex: 0, length: 5 })
+      )
     )
     .pipe(
-      map(([globalSearch, sort]) => ({
+      map(([globalSearch, sort, page]) => ({
         globalFilter: globalSearch as string,
-        sort: sort
+        sort: sort,
+        paging: page as PageEvent
       }))
     );
-    this.tableData$ = this.tableState$.pipe(
+    this.refinedTableData$ = this.tableState$.pipe(
       switchMap(tableState => this.store$.pipe(
         select(refinedTableData(tableState)),
         tap(() => this.initialized = true)

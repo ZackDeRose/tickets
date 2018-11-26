@@ -19,7 +19,8 @@ import {
   MatDialogModule,
   MatSelectModule,
   MatInputModule,
-  MatSortModule
+  MatSortModule,
+  MatPaginatorModule
 } from '@angular/material';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
@@ -54,6 +55,7 @@ import { CreateTicketDialogComponent } from './components/create-ticket-dialog/c
     MatSelectModule,
     MatInputModule,
     MatSortModule,
+    MatPaginatorModule,
     DataLayerModule,
     StoreModule.forRoot({}),
     EffectsModule.forRoot([
