@@ -1,3 +1,4 @@
+import { DATA_INTERVAL_DURATION } from './data-interval-duration-injection';
 import { TicketListEffects } from './components/ticket-list/ticket-list.effects';
 import { DataLayerModule } from './data-layer/data-layer.module';
 import { BackendService } from './backend.service';
@@ -68,7 +69,13 @@ import { CreateTicketDialogComponent } from './components/create-ticket-dialog/c
     }),
     HttpClientModule
   ],
-  providers: [BackendService],
+  providers: [
+    BackendService,
+    {
+      provide: DATA_INTERVAL_DURATION,
+      useValue: 15000
+    }
+  ],
   bootstrap: [AppComponent],
   entryComponents: [
     EditAssigneeDialogComponent,

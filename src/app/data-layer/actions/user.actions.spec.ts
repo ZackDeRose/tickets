@@ -3,10 +3,7 @@ import {
   UserRequestLoad,
   UserActionTypes,
   UserLoadSuccess,
-  UserLoadError,
-  UserRequestLoadSingle,
-  UserLoadSingleSuccess,
-  UserLoadSingleError
+  UserLoadError
 } from './user.actions';
 
 
@@ -32,31 +29,6 @@ describe('User Actions', () => {
     const action = new UserLoadError(error);
 
     expect(action.type).toBe(UserActionTypes.LoadError);
-    expect(action.error).toBe(error);
-  });
-
-  it('should create UserRequestLoadSingle Action', () => {
-    const id = 1337;
-    const action = new UserRequestLoadSingle(id);
-
-    expect(action.type).toBe(UserActionTypes.RequestLoadSingle);
-    expect(action.userId).toBe(id);
-  });
-
-  it('should create UserLoadSingleSuccess Action', () => {
-    const user = createUser();
-    const action = new UserLoadSingleSuccess(user);
-
-    expect(action.type).toBe(UserActionTypes.LoadSingleSuccess);
-    expect(action.user).toEqual(user);
-  });
-
-  it('should create UserLoadSingleError Action', () => {
-    const errorMsg = 'test error';
-    const error = new Error(errorMsg);
-    const action = new UserLoadSingleError(error);
-
-    expect(action.type).toBe(UserActionTypes.LoadSingleError);
     expect(action.error).toBe(error);
   });
 

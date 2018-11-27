@@ -2,10 +2,7 @@ import { Injectable } from '@angular/core';
 import {
   UserLoadSuccess,
   UserLoadError,
-  UserActionTypes,
-  UserLoadSingleSuccess,
-  UserLoadSingleError,
-  UserRequestLoadSingle
+  UserActionTypes
 } from '../actions/user.actions';
 import { Observable, of } from 'rxjs';
 import { switchMap, map } from 'rxjs/operators';
@@ -30,21 +27,21 @@ export class UserEffects {
     })
   );
 
-  @Effect()
-  loadSingleEffect$: Observable<UserLoadSingleSuccess | UserLoadSingleError> = this.actions$.pipe(
-    ofType(UserActionTypes.RequestLoadSingle),
-    switchMap((action: UserRequestLoadSingle) => {
-      let toReturn: Observable<UserLoadSingleSuccess | UserLoadSingleError>;
-      try {
-        toReturn = this.backendService.user(action.userId).pipe(
-          map(user => new UserLoadSingleSuccess(user))
-        );
-      } catch (error) {
-        toReturn = of(new UserLoadSingleError(error));
-      }
-      return toReturn;
-    })
-  );
+  // @Effect()
+  // loadSingleEffect$: Observable<UserLoadSingleSuccess | UserLoadSingleError> = this.actions$.pipe(
+  //   ofType(UserActionTypes.RequestLoadSingle),
+  //   switchMap((action: UserRequestLoadSingle) => {
+  //     let toReturn: Observable<UserLoadSingleSuccess | UserLoadSingleError>;
+  //     try {
+  //       toReturn = this.backendService.user(action.userId).pipe(
+  //         map(user => new UserLoadSingleSuccess(user))
+  //       );
+  //     } catch (error) {
+  //       toReturn = of(new UserLoadSingleError(error));
+  //     }
+  //     return toReturn;
+  //   })
+  // );
 
   constructor(private actions$: Actions, private backendService: BackendService) {}
 }

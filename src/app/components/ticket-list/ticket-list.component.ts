@@ -86,19 +86,26 @@ export const refinedTableData = (tableState: TableState) => createSelector(
   tableDataSelector,
   tableData => {
     let temp = [...tableData];
+
+    // filter by search term
     if (tableState.globalFilter) {
       temp = temp.filter(tableModel =>
         Object.values(tableModel).some(v => v.toString().toLowerCase().includes(tableState.globalFilter.toLowerCase()))
       );
     }
+
+    // sort
     if (tableState.sort && tableState.sort.active) {
       temp = temp.sort(sortByKey(tableState.sort.active as keyof TicketTableModel, tableState.sort.direction));
     }
+
+    // page
     if (tableState.paging) {
       const startingIndex = tableState.paging.pageSize * tableState.paging.pageIndex;
       const endingIndex = Math.min(tableState.paging.length, startingIndex + tableState.paging.pageSize);
       temp = temp.slice(startingIndex, endingIndex);
     }
+
     return temp;
   }
 );
@@ -136,14 +143,17 @@ export class TicketListComponent implements OnInit {
     iconRegistry.addSvgIcon('edit', sanitizer.bypassSecurityTrustResourceUrl('assets/edit.svg'));
     iconRegistry.addSvgIcon('checked-box', sanitizer.bypassSecurityTrustResourceUrl('assets/checked-box.svg'));
     iconRegistry.addSvgIcon('un-checked-box', sanitizer.bypassSecurityTrustResourceUrl('assets/un-checked-box.svg'));
+    iconRegistry.addSvgIcon('loading', sanitizer.bypassSecurityTrustResourceUrl('assets/loading.svg'));
   }
 
-  async ngOnInit() {
+  ngOnInit() {
     this.tableData$ = this.store$.pipe(select(tableDataSelector));
+
     this.filteredTableData$ = this.globalSearch.valueChanges.pipe(
       startWith(this.globalSearch.value),
       switchMap(searchTerm => this.store$.pipe(select(filteredTableData({ globalFilter: searchTerm } as TableState))))
     );
+
     this.tableState$ = combineLatest(
       this.globalSearch.valueChanges.pipe(startWith(this.globalSearch.value)),
       this.sort.sortChange.pipe(startWith(({ active: this.sort.active, direction: this.sort.direction }))),
@@ -163,12 +173,14 @@ export class TicketListComponent implements OnInit {
         },
       }))
     );
+
     this.refinedTableData$ = this.tableState$.pipe(
       switchMap(tableState => this.store$.pipe(
         select(refinedTableData(tableState)),
         tap(() => this.initialized = true)
       ))
     );
+
     this.loading$ = combineLatest(
       this.store$.pipe(select(ticketsLoading)),
       this.store$.pipe(select(ticketsSubmitting)),
@@ -178,9 +190,8 @@ export class TicketListComponent implements OnInit {
     .pipe(
       map(arr => arr.some(working => !!working))
     );
-    this.submitting$ = this.store$.pipe(select(ticketsSubmitting));
 
-    this.store$.dispatch(new TicketListInit());
+    this.submitting$ = this.store$.pipe(select(ticketsSubmitting));
   }
 
   toggleCompleted(ticketId: number, completed: boolean) {

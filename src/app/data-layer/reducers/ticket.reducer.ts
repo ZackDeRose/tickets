@@ -134,31 +134,6 @@ export function ticketReducer(state = initialTicketState, action: TicketActions)
       };
     }
 
-    case TicketActionTypes.RequestLoadSingle: {
-      return {
-        ...state,
-        loading: true,
-        loaded: false,
-      };
-    }
-
-    case TicketActionTypes.LoadSingleSuccess: {
-      return {
-        ...adapter.upsertOne(action.loadedData, state),
-        loading: false,
-        loaded: true,
-      };
-    }
-
-    case TicketActionTypes.LoadSingleError: {
-      return {
-        ...state,
-        loading: false,
-        loaded: false,
-        error: action.error.message
-      };
-    }
-
     default: return state;
   }
 }

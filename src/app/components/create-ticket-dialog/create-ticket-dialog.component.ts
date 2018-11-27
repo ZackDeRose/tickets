@@ -1,9 +1,10 @@
+import { DomSanitizer } from '@angular/platform-browser';
 import { TicketListCreateNew } from './../ticket-list/ticket-list.actions';
 import { take, startWith, switchMap, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { Actions, ofType } from '@ngrx/effects';
 import { Store, select } from '@ngrx/store';
-import { MatDialogRef } from '@angular/material';
+import { MatDialogRef, MatIconRegistry } from '@angular/material';
 import { FormControl, Validators } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
 import { ticketsSubmitting, TicketActionTypes } from 'tickets-data-layer';
@@ -23,7 +24,11 @@ export class CreateTicketDialogComponent implements OnInit {
     private store$: Store<any>,
     private actions$: Actions,
     private dialogRef: MatDialogRef<CreateTicketDialogComponent>,
-  ) { }
+    iconRegistry: MatIconRegistry,
+    sanitizer: DomSanitizer,
+  ) {
+    iconRegistry.addSvgIcon('loading', sanitizer.bypassSecurityTrustResourceUrl('assets/loading.svg'));
+  }
 
   ngOnInit() {
     this.submitting$ = this.store$.pipe(select(ticketsSubmitting));

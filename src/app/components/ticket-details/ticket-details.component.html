@@ -7,11 +7,9 @@
 <mat-card class="detail-card">
   <mat-card-header>
     <div mat-card-avatar class="avatar">
-      <mat-progress-spinner 
-        *ngIf="(submitting$ | async) || !(ticket$ | async); else completedIcon"
-        mode="indeterminate"
-        diameter="40">
-      </mat-progress-spinner>
+      <button *ngIf="submitting$ | async; else completedIcon" mat-icon-button disabled="true" class="spinning">
+        <mat-icon svgIcon="loading" class="avatar-icon"></mat-icon>
+      </button>
       <ng-template #completedIcon>
         <button mat-icon-button (click)="complete()">
           <mat-icon 

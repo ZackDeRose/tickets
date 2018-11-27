@@ -12,10 +12,7 @@ import {
   TicketAssignError,
   TicketRequestComplete,
   TicketCompleteSuccess,
-  TicketCompleteError,
-  TicketRequestLoadSingle,
-  TicketLoadSingleSuccess,
-  TicketLoadSingleError
+  TicketCompleteError
 } from './ticket.actions';
 
 
@@ -123,31 +120,6 @@ describe('Ticket Actions', () => {
     const action = new TicketCompleteError(error);
 
     expect(action.type).toBe(TicketActionTypes.CompleteError);
-    expect(action.error).toBe(error);
-  });
-
-  it('should create TicketRequestLoadSingle action', () => {
-    const id = 1337;
-    const action = new TicketRequestLoadSingle(id);
-
-    expect(action.type).toBe(TicketActionTypes.RequestLoadSingle);
-    expect(action.id).toBe(id);
-  });
-
-  it('should create TicketLoadSingleSuccess action', () => {
-    const ticketPayload = createTicket({id: 1337, description: 'test ticket'});
-    const action = new TicketLoadSingleSuccess(ticketPayload);
-
-    expect(action.type).toBe(TicketActionTypes.LoadSingleSuccess);
-    expect(action.loadedData).toEqual(ticketPayload);
-  });
-
-  it('should create TicketLoadSingleError action', () => {
-    const errorMsg = 'test error message';
-    const error = new Error(errorMsg);
-    const action = new TicketLoadSingleError(error);
-
-    expect(action.type).toBe(TicketActionTypes.LoadSingleError);
     expect(action.error).toBe(error);
   });
 

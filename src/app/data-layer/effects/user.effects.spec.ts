@@ -6,10 +6,7 @@ import { cold } from 'jasmine-marbles';
 import { BackendService } from '../../backend.service';
 import {
   UserActionTypes,
-  UserLoadSuccess,
-  UserLoadSingleSuccess,
-  UserRequestLoadSingle,
-  UserLoadSingleError
+  UserLoadSuccess
 } from 'tickets-data-layer/actions';
 import { UserLoadError } from 'tickets-data-layer/actions';
 
@@ -30,7 +27,7 @@ describe('User Effects', () => {
 
     it('should not emit anything if an unwatched action occurs', () => {
       const source = cold('a-b-c', {
-        a: { type: UserActionTypes.LoadSingleError},
+        a: { type: UserActionTypes.LoadError},
         b: { type: 'test action type'},
         c: { name: 'this one is not even an action'}
       });
@@ -100,85 +97,6 @@ describe('User Effects', () => {
       const effects = new UserEffects(new Actions(source), service);
 
       expect(effects.loadEffect$).toBeObservable(expected);
-    });
-
-  });
-
-  describe('loadSingleEffect', () => {
-
-    it('should not emit anything if an unwatched action occurs', () => {
-      const source = cold('a-b-c', {
-        a: { type: UserActionTypes.LoadSingleError},
-        b: { type: 'test action type'},
-        c: { name: 'this one is not even an action'}
-      });
-      const expected = cold('---', {});
-
-      const effects = new UserEffects(new Actions(source), service);
-
-      expect(effects.loadSingleEffect$).toBeObservable(expected);
-    });
-
-    it('should emit UserLoadSingleSuccess on success', () => {
-      const source = cold('a', { a: { type: UserActionTypes.RequestLoadSingle }});
-
-      const user = testUsers[0];
-
-      service.user.and.returnValue(of(user));
-
-      const expected = cold('a', {
-        a: new UserLoadSingleSuccess(user)
-      });
-
-      const effects = new UserEffects(new Actions(source), service);
-
-      expect(effects.loadSingleEffect$).toBeObservable(expected);
-    });
-
-    it('should emit UserLoadSingleError on error', () => {
-      const source = cold('a', { a: { type: UserActionTypes.RequestLoadSingle }});
-
-      const errorMsg = 'test Error';
-      const error = new Error(errorMsg);
-      service.user.and.throwError(errorMsg);
-
-      const expected = cold('a', {
-        a: new UserLoadSingleError(error)
-      });
-
-      const effects = new UserEffects(new Actions(source), service);
-
-      expect(effects.loadSingleEffect$).toBeObservable(expected);
-    });
-
-    it('should continue to emit after an error', () => {
-      const userId = 0;
-      const source = cold('a-b', {
-        a: new UserRequestLoadSingle(userId),
-        b: new UserRequestLoadSingle(userId)
-      });
-
-      const user = testUsers[0];
-
-      const errorMsg = 'test Error';
-      const error = new Error(errorMsg);
-      let count = 0;
-      service.user.and.callFake(() => {
-        if (count === 0) {
-          count++;
-          throw error;
-        }
-        return of(user);
-      });
-
-      const expected = cold('a-b', {
-        a: new UserLoadSingleError(error),
-        b: new UserLoadSingleSuccess(user)
-      });
-
-      const effects = new UserEffects(new Actions(source), service);
-
-      expect(effects.loadSingleEffect$).toBeObservable(expected);
     });
 
   });

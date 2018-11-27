@@ -38,14 +38,15 @@ export class TicketDetailsComponent implements OnInit {
     iconRegistry.addSvgIcon('checked-box', sanitizer.bypassSecurityTrustResourceUrl('assets/checked-box.svg'));
     iconRegistry.addSvgIcon('un-checked-box', sanitizer.bypassSecurityTrustResourceUrl('assets/un-checked-box.svg'));
     iconRegistry.addSvgIcon('edit', sanitizer.bypassSecurityTrustResourceUrl('assets/edit.svg'));
+    iconRegistry.addSvgIcon('loading', sanitizer.bypassSecurityTrustResourceUrl('assets/loading.svg'));
   }
 
   ngOnInit() {
-    this.route.paramMap.pipe(
-      take(1),
-      map(params => params.get('id')),
-    )
-    .subscribe(id => this.store$.dispatch(new TicketDetailsInit(Number(id))));
+    // const id = await this.route.paramMap.pipe(
+    //   map(params => params.get('id')),
+    //   take(1)
+    // ).toPromise();
+    // .subscribe(id => this.store$.dispatch(new TicketDetailsInit(Number(id))));
 
     this.ticket$ = this.route.paramMap.pipe(
       map(params => params.get('id')),
@@ -54,6 +55,7 @@ export class TicketDetailsComponent implements OnInit {
         map(tickets => tickets[id])
       ))
     );
+
     this.user$ = this.ticket$.pipe(
       filter(ticket => !!ticket),
       map(ticket => ticket.assigneeId),
@@ -62,6 +64,7 @@ export class TicketDetailsComponent implements OnInit {
         map(users => users[userId])
       ))
     );
+
     this.loading$ = combineLatest(
       this.store$.pipe(select(ticketsLoading)),
       this.store$.pipe(select(ticketsSubmitting)),
@@ -71,6 +74,7 @@ export class TicketDetailsComponent implements OnInit {
     .pipe(
       map(arr => arr.some(x => !!x))
     );
+
     this.submitting$ = this.store$.pipe(select(ticketsSubmitting));
   }
 

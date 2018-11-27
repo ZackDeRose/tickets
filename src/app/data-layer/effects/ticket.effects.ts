@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { DATA_INTERVAL_DURATION } from './../../data-interval-duration-injection';
+import { Injectable, Inject } from '@angular/core';
 import {
   TicketLoadSuccess,
   TicketLoadError,
@@ -7,9 +8,6 @@ import {
   TicketAddError,
   TicketRequestAdd,
   TicketRequestLoad,
-  TicketLoadSingleSuccess,
-  TicketLoadSingleError,
-  TicketRequestLoadSingle,
   TicketCompleteSuccess,
   TicketCompleteError,
   TicketRequestComplete,
@@ -17,13 +15,22 @@ import {
   TicketRequestAssign,
   TicketAssignSuccess
 } from '../actions/ticket.actions';
-import { Observable, of } from 'rxjs';
-import { switchMap, map, concatMap, mergeMap } from 'rxjs/operators';
+import { Observable, of, timer } from 'rxjs';
+import { switchMap, map, concatMap, mergeMap, mapTo } from 'rxjs/operators';
 import { Effect, Actions, ofType } from '@ngrx/effects';
 import { BackendService } from '../../backend.service';
+import { UserRequestLoad } from 'tickets-data-layer/actions';
 
 @Injectable()
 export class TicketEffects {
+  @Effect()
+  timer$ = timer(0, this.interval).pipe(
+    switchMap(() => [
+      new TicketRequestLoad(),
+      new UserRequestLoad()
+    ])
+  );
+
   @Effect()
   loadEffect$: Observable<TicketLoadSuccess | TicketLoadError> = this.actions$.pipe(
     ofType(TicketActionTypes.RequestLoad),
@@ -40,21 +47,21 @@ export class TicketEffects {
     }),
   );
 
-  @Effect()
-  loadSingleEffect$: Observable<TicketLoadSingleSuccess | TicketLoadSingleError> = this.actions$.pipe(
-    ofType(TicketActionTypes.RequestLoadSingle),
-    switchMap((action: TicketRequestLoadSingle) => {
-      let toReturn: Observable<TicketLoadSingleSuccess | TicketLoadSingleError>;
-      try {
-        toReturn = this.backendService.ticket(action.id).pipe(
-          map(ticket => new TicketLoadSingleSuccess(ticket)),
-        );
-      } catch (error) {
-        toReturn = of(new TicketLoadSingleError(error));
-      }
-      return toReturn;
-    })
-  );
+  // @Effect()
+  // loadSingleEffect$: Observable<TicketLoadSingleSuccess | TicketLoadSingleError> = this.actions$.pipe(
+  //   ofType(TicketActionTypes.RequestLoadSingle),
+  //   switchMap((action: TicketRequestLoadSingle) => {
+  //     let toReturn: Observable<TicketLoadSingleSuccess | TicketLoadSingleError>;
+  //     try {
+  //       toReturn = this.backendService.ticket(action.id).pipe(
+  //         map(ticket => new TicketLoadSingleSuccess(ticket)),
+  //       );
+  //     } catch (error) {
+  //       toReturn = of(new TicketLoadSingleError(error));
+  //     }
+  //     return toReturn;
+  //   })
+  // );
 
   @Effect()
   addEffect$: Observable<TicketAddSuccess | TicketAddError> = this.actions$.pipe(
@@ -70,16 +77,6 @@ export class TicketEffects {
       }
       return toReturn;
     })
-  );
-
-  @Effect()
-  triggerLoad$: Observable<TicketRequestLoad> = this.actions$.pipe(
-    ofType(
-      // TicketActionTypes.AddSuccess,
-      // TicketActionTypes.AssignSuccess,
-      // TicketActionTypes.CompleteSuccess
-    ),
-    map(() => new TicketRequestLoad())
   );
 
   @Effect()
@@ -114,5 +111,9 @@ export class TicketEffects {
     })
   );
 
-  constructor(private actions$: Actions, private backendService: BackendService) {}
+  constructor(
+    private actions$: Actions,
+    private backendService: BackendService,
+    @Inject(DATA_INTERVAL_DURATION) private interval?: number
+  ) {}
 }

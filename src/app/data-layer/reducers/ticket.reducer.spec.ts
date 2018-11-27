@@ -9,9 +9,6 @@ import {
   TicketRequestComplete,
   TicketCompleteSuccess,
   TicketCompleteError,
-  TicketRequestLoadSingle,
-  TicketLoadSingleSuccess,
-  TicketLoadSingleError
 } from './../actions/ticket.actions';
 import { initialTicketState, ticketReducer } from './ticket.reducer';
 import { TicketActions, TicketRequestLoad } from 'tickets-data-layer/actions';
@@ -329,68 +326,6 @@ describe('TicketReducer', () => {
       expect(state.loaded).toBe(originalState.loaded);
       expect(state.submitting).toBeFalsy();
       expect(state.submitted).toBeFalsy();
-      expect(state.error).toBe(errorMsg);
-      expect(state.ids).toBe(originalState.ids);
-      expect(state.entities).toBe(originalState.entities);
-    });
-
-  });
-
-  describe('RequestLoadSingle Action', () => {
-
-    it('should reflect that it was started to load the ticket', () => {
-      const action = new TicketRequestLoadSingle(99);
-      const originalState = createTicketState();
-      const state = ticketReducer(originalState, action);
-
-      expect(state.loading).toBeTruthy();
-      expect(state.loaded).toBeFalsy();
-      expect(state.submitted).toBe(originalState.submitted);
-      expect(state.submitting).toBe(originalState.submitting);
-      expect(state.error).toBe(originalState.error);
-      expect(state.ids).toBe(originalState.ids);
-      expect(state.entities).toBe(originalState.entities);
-    });
-
-  });
-
-  describe('LoadSingleSuccess Action', () => {
-
-    it('should load the ticket to the store, with pre-existing tickets unchanged', () => {
-      const ticketPayload = createTicket({id: 1337, description: 'test ticket'});
-      const action = new TicketLoadSingleSuccess(ticketPayload);
-      const originalState = createTicketState();
-      const state = ticketReducer(originalState, action);
-
-      expect(state.loading).toBeFalsy();
-      expect(state.loaded).toBeTruthy();
-      expect(state.submitted).toBe(originalState.submitted);
-      expect(state.submitting).toBe(originalState.submitting);
-      expect(state.error).toBe(originalState.error);
-      expect(state.ids).toContain(ticketPayload.id);
-      const originalIdsFilteredByNewIds = (originalState.ids as number[]).filter(id =>
-        !(state.ids as number[]).includes(id)
-      );
-      expect(originalIdsFilteredByNewIds.length).toBe(0);
-      expect(state.entities).toEqual(jasmine.objectContaining({ [ticketPayload.id]: ticketPayload }));
-      expect(state.entities).toEqual(jasmine.objectContaining(originalState.entities));
-    });
-
-  });
-
-  describe('LoadSingleError Action', () => {
-
-    it('should reflect that an error occurred', () => {
-      const errorMsg = 'test error message';
-      const error = new Error(errorMsg);
-      const action = new TicketLoadSingleError(error);
-      const originalState = createTicketState();
-      const state = ticketReducer(originalState, action);
-
-      expect(state.loading).toBeFalsy();
-      expect(state.loaded).toBeFalsy();
-      expect(state.submitting).toBe(originalState.submitting);
-      expect(state.submitted).toBe(originalState.submitted);
       expect(state.error).toBe(errorMsg);
       expect(state.ids).toBe(originalState.ids);
       expect(state.entities).toBe(originalState.entities);

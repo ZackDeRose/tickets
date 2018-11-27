@@ -1,9 +1,10 @@
+import { DomSanitizer } from '@angular/platform-browser';
 import { TicketListEditAssignee } from './../ticket-list/ticket-list.actions';
 import { selectUserEntities } from './../../data-layer/reducers/user.reducer';
 import { map, take, switchMap, startWith, filter } from 'rxjs/operators';
 import { Actions, ofType } from '@ngrx/effects';
 import { Component, OnInit, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { MatDialogRef, MAT_DIALOG_DATA, MatIconRegistry } from '@angular/material';
 import { Store, select } from '@ngrx/store';
 import { TicketDetailsEditAssignee } from '../ticket-details/ticket-details.actions';
 import {
@@ -35,8 +36,12 @@ export class EditAssigneeDialogComponent implements OnInit {
     private store$: Store<any>,
     private actions$: Actions,
     private dialogRef: MatDialogRef<EditAssigneeDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) private data: { ticketId: number, parent?: 'list' | 'details' }
-  ) { }
+    @Inject(MAT_DIALOG_DATA) private data: { ticketId: number, parent?: 'list' | 'details' },
+    iconRegistry: MatIconRegistry,
+    sanitizer: DomSanitizer,
+  ) {
+    iconRegistry.addSvgIcon('loading', sanitizer.bypassSecurityTrustResourceUrl('assets/loading.svg'));
+  }
 
   ngOnInit() {
     this.userOptions$ = this.store$.pipe(select(selectAllUsers));

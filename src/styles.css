@@ -5,3 +5,13 @@
   font-family: 'Roboto', sans-serif;
 }
 
+@keyframes spinning {
+  0%  {transform: rotateZ(0)}
+  100%  {transform: rotateZ(360deg)}
+}
+
+.spinning {
+  animation-name: spinning;
+  animation-duration: .5s;
+  animation-iteration-count: infinite;
+}

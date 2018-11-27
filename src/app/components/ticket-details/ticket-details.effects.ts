@@ -1,25 +1,15 @@
-import { switchMap, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { Actions, ofType, Effect } from '@ngrx/effects';
 import {
   TicketDetailsActionTypes,
-  TicketDetailsInit,
   TicketDetailsAlterCompleted,
   TicketDetailsEditAssignee
 } from './ticket-details.actions';
-import { TicketRequestLoadSingle, UserRequestLoad, TicketRequestComplete, TicketRequestAssign } from 'tickets-data-layer';
+import { TicketRequestComplete, TicketRequestAssign } from 'tickets-data-layer';
 import { Injectable } from '@angular/core';
 
 @Injectable()
 export class TicketDetailsEffects {
-  @Effect()
-  init$ = this.actions$.pipe(
-    ofType(TicketDetailsActionTypes.Init),
-    switchMap((action: TicketDetailsInit) => [
-      new TicketRequestLoadSingle(action.id),
-      new UserRequestLoad()
-    ])
-  );
-
   @Effect()
   triggerRequestComplete$ = this.actions$.pipe(
     ofType(TicketDetailsActionTypes.AlterCompleted),

@@ -14,9 +14,6 @@ export enum TicketActionTypes {
   RequestComplete = '[Backend API] Ticket Request Complete',
   CompleteSuccess = '[Backend API] Ticket Complete Success',
   CompleteError = '[Backend API] Ticket Complete Error',
-  RequestLoadSingle = '[Backend API] Ticket Request Load Single',
-  LoadSingleSuccess = '[Backend API] Ticket Load Single Success',
-  LoadSingleError = '[Backend API] Ticket Load Single Error'
 }
 
 export class TicketRequestLoad implements Action {
@@ -89,24 +86,6 @@ export class TicketCompleteError implements Action {
   constructor(public error: Error) {}
 }
 
-export class TicketRequestLoadSingle implements Action {
-  readonly type = TicketActionTypes.RequestLoadSingle;
-
-  constructor(public id: number) {}
-}
-
-export class TicketLoadSingleSuccess implements Action {
-  readonly type = TicketActionTypes.LoadSingleSuccess;
-
-  constructor(public loadedData: Ticket) {}
-}
-
-export class TicketLoadSingleError implements Action {
-  readonly type = TicketActionTypes.LoadSingleError;
-
-  constructor(public error: Error) {}
-}
-
 export type TicketActions =
   TicketRequestLoad
   | TicketLoadSuccess
@@ -119,7 +98,4 @@ export type TicketActions =
   | TicketAssignError
   | TicketRequestComplete
   | TicketCompleteSuccess
-  | TicketCompleteError
-  | TicketRequestLoadSingle
-  | TicketLoadSingleSuccess
-  | TicketLoadSingleError;
+  | TicketCompleteError;

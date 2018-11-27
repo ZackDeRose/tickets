@@ -60,31 +60,6 @@ export function userReducer(state = initialUserState, action: UserActions): User
       };
     }
 
-    case UserActionTypes.RequestLoadSingle: {
-      return {
-        ...state,
-        loading: true,
-        loaded: false
-      };
-    }
-
-    case UserActionTypes.LoadSingleSuccess: {
-      return {
-        ...adapter.upsertOne(action.user, state),
-        loading: false,
-        loaded: true
-      };
-    }
-
-    case UserActionTypes.LoadSingleError: {
-      return {
-        ...state,
-        submitting: false,
-        submitted: false,
-        error: action.error.message
-      };
-    }
-
     default: return state;
   }
 }

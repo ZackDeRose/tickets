@@ -12,16 +12,6 @@ import { TicketRequestAdd, TicketRequestLoad, UserRequestLoad, TicketRequestAssi
 
 @Injectable()
 export class TicketListEffects {
-
-  @Effect()
-  init$ = this.actions$.pipe(
-    ofType(TicketListActionTypes.Init),
-    switchMap((action: TicketListInit) => [
-      new TicketRequestLoad(),
-      new UserRequestLoad()
-    ])
-  );
-
   @Effect()
   triggerAdd$ = this.actions$.pipe(
     ofType(TicketListActionTypes.CreateNew),

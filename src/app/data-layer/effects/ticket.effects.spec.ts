@@ -11,13 +11,11 @@ import {
   TicketRequestLoad,
   TicketAssignSuccess,
   TicketCompleteSuccess,
-  TicketLoadSingleSuccess,
-  TicketLoadSingleError,
-  TicketRequestLoadSingle,
   TicketRequestComplete,
   TicketCompleteError,
   TicketRequestAssign,
-  TicketAssignError
+  TicketAssignError,
+  UserRequestLoad
 } from 'tickets-data-layer/actions';
 import { Actions } from '@ngrx/effects';
 import { testTickets, createTicket, createUser } from 'testing-utils';
@@ -37,6 +35,26 @@ describe('Ticket Effects', () => {
       'assign',
       'complete'
     ]);
+  });
+
+  describe('timer', () => {
+
+    it('should emit a RequestTicketLoad action on app load', () => {
+      const source = cold('-');
+      const expected = cold('(ab)', { a: new TicketRequestLoad(), b: new UserRequestLoad() });
+
+      const effects = new TicketEffects(new Actions(source), service, 20);
+
+      expect(effects.timer$).toBeObservable(expected);
+    });
+
+    it('should continue to emit a RequestTicketLoad action at an interval that matches the injected interval', () => {
+      const expected = cold('(ab)-(ab)-(ab)-(ab)-(ab)', { a: new TicketRequestLoad(), b: new UserRequestLoad() });
+
+      const effects = new TicketEffects(new Actions(), service, 20);
+
+      expect(effects.timer$).toBeObservable(expected); // nothing emits from effects.timer$ :( FAILS
+    });
   });
 
   describe('loadEffect', () => {
@@ -192,152 +210,6 @@ describe('Ticket Effects', () => {
       const effects = new TicketEffects(new Actions(source), service);
 
       expect(effects.addEffect$).toBeObservable(expected);
-    });
-
-  });
-
-  describe('triggerLoad', () => {
-
-    it('should not emit anything id an unwatched action occurs', () => {
-      const source = cold('a-b-c', {
-        a: { type: TicketActionTypes.CompleteError},
-        b: { type: 'test action type'},
-        c: { name: 'this one is not even an action'}
-      });
-      const expected = cold('---', {});
-
-      const effects = new TicketEffects(new Actions(source), service);
-
-      expect(effects.triggerLoad$).toBeObservable(expected);
-    });
-
-    it('should emit a TicketRequestLoad whenever a TicketAddSuccess occurs', () => {
-      const ticket = createTicket({id: 1337, description: 'test'});
-      const source = cold('a', { a: new TicketAddSuccess(ticket) });
-      const expected = cold('a', { a: new TicketRequestLoad() });
-
-      const effects = new TicketEffects(new Actions(source), service);
-
-      expect(effects.triggerLoad$).toBeObservable(expected);
-    });
-
-    it('should emit a TicketRequestLoad whenever a TicketAssignSuccess occurs', () => {
-      const ticket = createTicket({id: 1337, description: 'test'});
-      const source = cold('a', { a: new TicketAssignSuccess(ticket) });
-      const expected = cold('a', { a: new TicketRequestLoad() });
-
-      const effects = new TicketEffects(new Actions(source), service);
-
-      expect(effects.triggerLoad$).toBeObservable(expected);
-    });
-
-    it('should emit a TicketRequestLoad whenever a TicketCinoketeSuccess occurs', () => {
-      const ticket = createTicket({id: 1337, description: 'test'});
-      const source = cold('a', { a: new TicketCompleteSuccess(ticket) });
-      const expected = cold('a', { a: new TicketRequestLoad() });
-
-      const effects = new TicketEffects(new Actions(source), service);
-
-      expect(effects.triggerLoad$).toBeObservable(expected);
-    });
-
-    it('should conitue to emit LoadRequests and ignore other action for all sequences', () => {
-      const ticket = createTicket({id: 1337, description: 'test'});
-      const source = cold('a-b-c-d-e', {
-        a: new TicketCompleteSuccess(ticket),
-        b: new TicketRequestLoad(),
-        c: new TicketAddSuccess(ticket),
-        d: new TicketRequestLoad(),
-        e: new TicketAssignSuccess(ticket),
-      });
-      const expected = cold('a---b---c', {
-        a: new TicketRequestLoad(),
-        b: new TicketRequestLoad(),
-        c: new TicketRequestLoad(),
-      });
-
-      const effects = new TicketEffects(new Actions(source), service);
-
-      expect(effects.triggerLoad$).toBeObservable(expected);
-    });
-
-  });
-
-  describe('loadSingleEffect', () => {
-
-    it('should not emit anything if an unwatched action occurs', () => {
-      const source = cold('a-b-c', {
-        a: { type: TicketActionTypes.LoadSingleError},
-        b: { type: 'test action type'},
-        c: { name: 'this one is not even an action'}
-      });
-      const expected = cold('---', {});
-
-      const effects = new TicketEffects(new Actions(source), service);
-
-      expect(effects.loadSingleEffect$).toBeObservable(expected);
-    });
-
-    it('should emit TicketLoadSingleSuccess on success', () => {
-      const source = cold('a', { a: { type: TicketActionTypes.RequestLoadSingle }});
-
-      const ticket = testTickets[0];
-
-      service.ticket.and.returnValue(of(ticket));
-
-      const expected = cold('a', {
-        a: new TicketLoadSingleSuccess(ticket)
-      });
-
-      const effects = new TicketEffects(new Actions(source), service);
-
-      expect(effects.loadSingleEffect$).toBeObservable(expected);
-    });
-
-    it('should emit TicketLoadSingleError on error', () => {
-      const source = cold('a', { a: { type: TicketActionTypes.RequestLoadSingle }});
-
-      const errorMsg = 'test Error';
-      const error = new Error(errorMsg);
-      service.ticket.and.throwError(errorMsg);
-
-      const expected = cold('a', {
-        a: new TicketLoadSingleError(error)
-      });
-
-      const effects = new TicketEffects(new Actions(source), service);
-
-      expect(effects.loadSingleEffect$).toBeObservable(expected);
-    });
-
-    it('should continue to emit after an error', () => {
-      const ticketId = 0;
-      const source = cold('a-b', {
-        a: new TicketRequestLoadSingle(ticketId),
-        b: new TicketRequestLoadSingle(ticketId)
-      });
-
-      const ticket = testTickets[0];
-
-      const errorMsg = 'test Error';
-      const error = new Error(errorMsg);
-      let count = 0;
-      service.ticket.and.callFake(() => {
-        if (count === 0) {
-          count++;
-          throw error;
-        }
-        return of(ticket);
-      });
-
-      const expected = cold('a-b', {
-        a: new TicketLoadSingleError(error),
-        b: new TicketLoadSingleSuccess(ticket)
-      });
-
-      const effects = new TicketEffects(new Actions(source), service);
-
-      expect(effects.loadSingleEffect$).toBeObservable(expected);
     });
 
   });
