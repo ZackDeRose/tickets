@@ -38,28 +38,25 @@ export const testTickets: Dictionary<Ticket> = {
   4: createTicket({ id: 4, description: 'Tickets App - Hiring Test', assigneeId: 0, completed: false })
 };
 
-export const createTicketState: (x?: TicketState) => TicketState = ({
+export const createTicketState: (x?: Partial<TicketState>) => TicketState = ({
   ids = Object.values(testTickets).map(ticket => ticket.id),
   entities = { ...testTickets },
-  loaded = false,
-  loading = false,
-  submitted = false,
-  submitting = false,
+  loading = 0,
+  adding = 0,
+  submitting = {},
   error = ''
 } = {
   ids,
   entities,
-  loaded,
   loading,
-  submitted,
+  adding,
   submitting,
   error
 }) => ({
   ids,
   entities,
-  loaded,
   loading,
-  submitted,
+  adding,
   submitting,
   error
 });

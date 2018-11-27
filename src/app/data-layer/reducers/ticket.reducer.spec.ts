@@ -9,6 +9,7 @@ import {
   TicketRequestComplete,
   TicketCompleteSuccess,
   TicketCompleteError,
+  TicketAddError,
 } from './../actions/ticket.actions';
 import { initialTicketState, ticketReducer } from './ticket.reducer';
 import { TicketActions, TicketRequestLoad } from 'tickets-data-layer/actions';
@@ -51,13 +52,12 @@ describe('TicketReducer', () => {
     const originalState = createTicketState();
     const state = ticketReducer(originalState, action);
 
-    it('should reflect that it has started to load the tickets', () => {
-      expect(state.loading).toBeTruthy();
-      expect(state.loaded).toBeFalsy();
+    it('should reflect that it is loading tickets', () => {
+      expect(state.loading).toBe(1);
     });
 
     it('should not change anything else', () => {
-      expect(state.submitted).toBe(originalState.submitted);
+      expect(state.adding).toBe(originalState.adding);
       expect(state.submitting).toBe(originalState.submitting);
       expect(state.error).toBe(originalState.error);
       expect(state.ids).toBe(originalState.ids);
@@ -73,12 +73,11 @@ describe('TicketReducer', () => {
        createTicket({id: 1337, description: 'test ticket'})
     ];
     const action = new TicketLoadSuccess(ticketsPayload);
-    const originalState = createTicketState();
+    const originalState = createTicketState({ loading: 1 });
     const state = ticketReducer(originalState, action);
 
-    it('should reflect that the tickets are done loading', () => {
-      expect(state.loading).toBeFalsy();
-      expect(state.loaded).toBeTruthy();
+    it('should reflect that the tickets are not currently loading', () => {
+      expect(state.loading).toBe(0);
     });
 
     it('should add the loaded tickets to the store', () => {
@@ -89,7 +88,7 @@ describe('TicketReducer', () => {
     });
 
     it('should not affect the rest of TicketState', () => {
-      expect(state.submitted).toBe(originalState.submitted);
+      expect(state.adding).toBe(originalState.adding);
       expect(state.submitting).toBe(originalState.submitting);
       expect(state.error).toBe(originalState.error);
     });
@@ -115,12 +114,11 @@ describe('TicketReducer', () => {
     const errorMsg = 'test error message';
     const error = new Error(errorMsg);
     const action = new TicketLoadError(error);
-    const originalState = createTicketState();
+    const originalState = createTicketState({ loading: 1 });
     const state = ticketReducer(originalState, action);
 
-    it('should reflect that loading is over and it is not loaded', () => {
-      expect(state.loading).toBeFalsy();
-      expect(state.loaded).toBeFalsy();
+    it('should reflect that it is no longer loading', () => {
+      expect(state.loading).toBe(0);
     });
 
     it('should put the error message into the store', () => {
@@ -128,7 +126,7 @@ describe('TicketReducer', () => {
     });
 
     it('should maintain the rest of the state', () => {
-      expect(state.submitted).toBe(originalState.submitted);
+      expect(state.adding).toBe(originalState.adding);
       expect(state.submitting).toBe(originalState.submitting);
       expect(state.ids).toEqual(originalState.ids);
       expect(JSON.stringify(state.entities)).toBe(JSON.stringify(originalState.entities));
@@ -137,16 +135,18 @@ describe('TicketReducer', () => {
   });
 
   describe('RequestAdd Action', () => {
+    const action = new TicketRequestAdd('test description');
+    const originalState = createTicketState();
+    const state = ticketReducer(originalState, action);
 
-    it('should reflect that it has started to add the ticket', () => {
-      const action = new TicketRequestAdd('test description');
-      const originalState = createTicketState();
-      const state = ticketReducer(originalState, action);
+    it('should reflect that it is adding a ticket', () => {
+      expect(state.adding).toBe(1);
+    });
 
+    it('should not affect anything else in the state', () => {
       expect(state.loading).toBe(originalState.loading);
-      expect(state.loaded).toBe(originalState.loaded);
-      expect(state.submitting).toBeTruthy();
-      expect(state.submitted).toBeFalsy();
+      expect(state.adding).toBe(originalState.adding);
+      expect(state.submitting).toBe(originalState.submitting);
       expect(state.error).toBe(originalState.error);
       expect(state.ids).toBe(originalState.ids);
       expect(state.entities).toBe(originalState.entities);
@@ -156,65 +156,93 @@ describe('TicketReducer', () => {
 
   describe('AddSuccess Action', () => {
 
+    const ticket = createTicket({id: 1337, description: 'test'});
+    const action = new TicketAddSuccess(ticket);
+    const originalState = createTicketState({ adding: 1 });
+    const state = ticketReducer(originalState, action);
+
+    it('should reflect that the ticket is no longer adding', () => {
+      expect(state.adding).toBe(0);
+    });
+
     it('should add the ticket to the store', () => {
-      const ticket = createTicket({id: 1337, description: 'test'});
-      const action = new TicketAddSuccess(ticket);
-      const originalState = createTicketState();
-      const state = ticketReducer(originalState, action);
-
-      expect(state.loading).toBe(originalState.loading);
-      expect(state.loaded).toBe(originalState.loaded);
-      expect(state.submitting).toBeFalsy();
-      expect(state.submitted).toBeTruthy();
-      expect(state.error).toBe(originalState.error);
       expect(state.ids).toContain(ticket.id);
+      expect(state.entities).toEqual(jasmine.objectContaining({ [ticket.id]: ticket }));
+    });
 
-      // all other IDs still there too
+    it('should still have all previous entities as well', () => {
       const originalIdsFilteredByNewIds = (originalState.ids as number[]).filter(id =>
         !(state.ids as number[]).includes(id)
       );
       expect(originalIdsFilteredByNewIds.length).toBe(0);
-
-      expect(state.entities).toEqual(jasmine.objectContaining({ [ticket.id]: ticket }));
       expect(state.entities).toEqual(jasmine.objectContaining(originalState.entities));
+    });
+
+    it('should leave the rest of the state unaffected', () => {
+      expect(state.loading).toBe(originalState.loading);
+      expect(state.submitting).toBe(originalState.submitting);
+      expect(state.error).toBe(originalState.error);
     });
 
   });
 
-  describe('LoadError Action', () => {
+  describe('AddError Action', () => {
+    const errorMsg = 'test error message';
+    const error = new Error(errorMsg);
+    const action = new TicketAddError(error);
+    const originalState = createTicketState({ adding: 1 });
+    const state = ticketReducer(originalState, action);
 
     it('should put the error message into the store', () => {
-      const errorMsg = 'test error message';
-      const error = new Error(errorMsg);
-      const action = new TicketLoadError(error);
-      const originalState = createTicketState();
-      const state = ticketReducer(originalState, action);
-
-      expect(state.loading).toBe(originalState.loading);
-      expect(state.loaded).toBe(originalState.loaded);
-      expect(state.submitted).toBeFalsy();
-      expect(state.submitting).toBeFalsy();
       expect(state.error).toBe(errorMsg);
-      expect(state.ids).toEqual(originalState.ids);
-      expect(JSON.stringify(state.entities)).toBe(JSON.stringify(originalState.entities));
+    });
+
+    it('should reflect that it is no longer adding this ticket', () => {
+      expect(state.adding).toBe(0);
+    });
+
+    it('should leave the rest of the state unaffected', () => {
+      expect(state.loading).toBe(originalState.loading);
+      expect(state.submitting).toBe(originalState.submitting);
+      expect(state.ids).toBe(originalState.ids);
+      expect(state.entities).toBe(originalState.entities);
     });
 
   });
 
   describe('RequestAssign Action', () => {
+    const userId = 1;
+    const ticketId = 312;
+    const action = new TicketRequestAssign(ticketId, userId);
+    const originalState = createTicketState({
+      submitting: {
+        123: { assignee: 1 },
+        321: { completed: 1 },
+        312: { completed: 1 }
+      }
+    });
+    const state = ticketReducer(originalState, action);
 
-    it('should reflect that it has started to assign the ticket', () => {
-      const userId = 1;
-      const ticketId = 312;
-      const action = new TicketRequestAssign(ticketId, userId);
-      const originalState = createTicketState();
-      const state = ticketReducer(originalState, action);
+    it('should increase the submitting.assignee value corresponding to the ticket id', () => {
+      expect(state.submitting[312].assignee).toBe(1);
+    });
 
+    it('should leave the completed value for the ticket id untouched', () => {
+      expect(state.submitting[312].completed).toBe(1);
+    });
+
+    it('should leave the rest of the submitting values the same', () => {
+      const submittingState = state.submitting;
+      delete submittingState[312];
+      expect(submittingState).toEqual({
+        123: { assignee: 1 },
+        321: { completed: 1 }
+      });
+    });
+
+    it('should leave the rest of the state unaffected', () => {
       expect(state.loading).toBe(originalState.loading);
-      expect(state.loaded).toBe(originalState.loaded);
-      expect(state.submitting).toBeTruthy();
-      expect(state.submitted).toBeFalsy();
-      expect(state.error).toBe(originalState.error);
+      expect(state.adding).toBe(originalState.adding);
       expect(state.ids).toBe(originalState.ids);
       expect(state.entities).toBe(originalState.entities);
     });
@@ -222,45 +250,101 @@ describe('TicketReducer', () => {
   });
 
   describe('AssignSuccess Action', () => {
+    const originalState = createTicketState({
+      submitting: {
+        123: { assignee: 1 },
+        321: { completed: 1 },
+        312: { assignee: 1, completed: 1 }
+      },
+      entities: {
+        123: createTicket({id: 123}),
+        321: createTicket({id: 321}),
+        312: createTicket({id: 312})
+      },
+      ids: [123, 321, 312]
+    });
+    const originalTicket = originalState.entities[312];
+    const newAssigneeId = 0;
+    const assignedTicket = { ...originalTicket, assigneeId: newAssigneeId };
+    const action = new TicketAssignSuccess(assignedTicket);
+    const state = ticketReducer(originalState, action);
 
-    it('should reflect that it is done submitting and adjust the ticket in the store', () => {
-      const originalState = createTicketState();
-      const originalTicket = originalState.entities[1];
-      const newAssigneeId = 1337;
-      const assignedTicket = { ...originalTicket, assigneeId: newAssigneeId };
-      const action = new TicketAssignSuccess(assignedTicket);
-      const state = ticketReducer(originalState, action);
+    it('should decrease the submitting.assignee value of the corresponding ticket', () => {
+      expect(state.submitting[312].assignee).toBe(0);
+    });
 
+    it('should leave the submitting.completed value for the ticket id untouched', () => {
+      expect(state.submitting[312].completed).toBe(1);
+    });
+
+    it('should leave the rest of the submitting values the same', () => {
+      const submittingState = state.submitting;
+      delete submittingState[312];
+      expect(submittingState).toEqual({
+        123: { assignee: 1 },
+        321: { completed: 1 }
+      });
+    });
+
+    it('should adjust the value of the returned ticket in the store', () => {
+      expect(state.entities[312]).toEqual(assignedTicket);
+    });
+
+    it('should leave the other tickets in the store untouched', () => {
+      expect(state.entities[123]).toBe(originalState.entities[123]);
+      expect(state.entities[321]).toBe(originalState.entities[321]);
+    });
+
+    it('should leave the rest of the state unaffected', () => {
       expect(state.loading).toBe(originalState.loading);
-      expect(state.loaded).toBe(originalState.loaded);
-      expect(state.submitting).toBeFalsy();
-      expect(state.submitted).toBeTruthy();
-      expect(state.error).toBe(originalState.error);
-      // all previous IDs to still be there
-      const originalIdsFilteredByNewIds = (originalState.ids as number[]).filter(id =>
-        !(state.ids as number[]).includes(id)
-      );
-      expect(originalIdsFilteredByNewIds.length).toBe(0);
-
-      expect(state.entities).toEqual(jasmine.objectContaining({ [assignedTicket.id]: assignedTicket }));
+      expect(state.adding).toBe(originalState.adding);
     });
 
   });
 
   describe('AssignError Action', () => {
+    const originalState = createTicketState({
+      submitting: {
+        123: { assignee: 1 },
+        321: { completed: 1 },
+        312: { assignee: 1, completed: 1 }
+      },
+      entities: {
+        123: createTicket({id: 123}),
+        321: createTicket({id: 321}),
+        312: createTicket({id: 312})
+      },
+      ids: [123, 321, 312]
+    });
+    const errorMsg = 'test error';
+    const error = new Error(errorMsg);
+    const action = new TicketAssignError(312, error);
+    const state = ticketReducer(originalState, action);
 
-    it('should reflect that an error occurred', () => {
-      const errorMsg = 'test error message';
-      const error = new Error(errorMsg);
-      const action = new TicketAssignError(error);
-      const originalState = createTicketState();
-      const state = ticketReducer(originalState, action);
-
-      expect(state.loading).toBe(originalState.loading);
-      expect(state.loaded).toBe(originalState.loaded);
-      expect(state.submitting).toBeFalsy();
-      expect(state.submitted).toBeFalsy();
+    it('should put the error message into the store', () => {
       expect(state.error).toBe(errorMsg);
+    });
+
+    it('should decrease the submitting.assignee value of the corresponding ticket', () => {
+      expect(state.submitting[312].assignee).toBe(0);
+    });
+
+    it('should leave the submitting.completed value for the ticket id untouched', () => {
+      expect(state.submitting[312].completed).toBe(1);
+    });
+
+    it('should leave the rest of the submitting values the same', () => {
+      const submittingState = state.submitting;
+      delete submittingState[312];
+      expect(submittingState).toEqual({
+        123: { assignee: 1 },
+        321: { completed: 1 }
+      });
+    });
+
+    it('should leave the rest of the state unaffected', () => {
+      expect(state.loading).toBe(originalState.loading);
+      expect(state.adding).toBe(originalState.adding);
       expect(state.ids).toBe(originalState.ids);
       expect(state.entities).toBe(originalState.entities);
     });
@@ -269,18 +353,37 @@ describe('TicketReducer', () => {
 
   describe('RequestComplete Action', () => {
 
-    it('should reflect that it has started to adjust the complete property of the ticket', () => {
-      const ticketId = 312;
-      const isCompleted = true;
-      const action = new TicketRequestComplete(ticketId, isCompleted);
-      const originalState = createTicketState();
-      const state = ticketReducer(originalState, action);
+    const ticketId = 312;
+    const action = new TicketRequestComplete(ticketId, true);
+    const originalState = createTicketState({
+      submitting: {
+        123: { assignee: 1 },
+        321: { completed: 1 },
+        312: { assignee: 1 }
+      }
+    });
+    const state = ticketReducer(originalState, action);
 
+    it('should increase the submitting.completed value corresponding to the ticket id', () => {
+      expect(state.submitting[312].completed).toBe(1);
+    });
+
+    it('should leave the assignee value for the ticket id untouched', () => {
+      expect(state.submitting[312].assignee).toBe(1);
+    });
+
+    it('should leave the rest of the submitting values the same', () => {
+      const submittingState = state.submitting;
+      delete submittingState[312];
+      expect(submittingState).toEqual({
+        123: { assignee: 1 },
+        321: { completed: 1 }
+      });
+    });
+
+    it('should leave the rest of the state unaffected', () => {
       expect(state.loading).toBe(originalState.loading);
-      expect(state.loaded).toBe(originalState.loaded);
-      expect(state.submitting).toBeTruthy();
-      expect(state.submitted).toBeFalsy();
-      expect(state.error).toBe(originalState.error);
+      expect(state.adding).toBe(originalState.adding);
       expect(state.ids).toBe(originalState.ids);
       expect(state.entities).toBe(originalState.entities);
     });
@@ -289,44 +392,102 @@ describe('TicketReducer', () => {
 
   describe('CompleteSuccess Action', () => {
 
-    it('should reflect that it is done submitting and adjust the ticket in the store', () => {
-      const originalState = createTicketState();
-      const originalTicket = originalState.entities[1];
-      const newCompletedId = 1337;
-      const completedTicket = { ...originalTicket, assigneeId: newCompletedId };
-      const action = new TicketCompleteSuccess(completedTicket);
-      const state = ticketReducer(originalState, action);
+    const originalState = createTicketState({
+      submitting: {
+        123: { assignee: 1 },
+        321: { completed: 1 },
+        312: { assignee: 1, completed: 1 }
+      },
+      entities: {
+        123: createTicket({id: 123}),
+        321: createTicket({id: 321}),
+        312: createTicket({id: 312})
+      },
+      ids: [123, 321, 312]
+    });
+    const originalTicket = originalState.entities[312];
+    const newAssigneeId = 0;
+    const assignedTicket = { ...originalTicket, assigneeId: newAssigneeId };
+    const action = new TicketCompleteSuccess(assignedTicket);
+    const state = ticketReducer(originalState, action);
 
+    it('should decrease the submitting.completed value of the corresponding ticket', () => {
+      expect(state.submitting[312].completed).toBe(0);
+    });
+
+    it('should leave the submitting.assignee value for the ticket id untouched', () => {
+      expect(state.submitting[312].assignee).toBe(1);
+    });
+
+    it('should leave the rest of the submitting values the same', () => {
+      const submittingState = state.submitting;
+      delete submittingState[312];
+      expect(submittingState).toEqual({
+        123: { assignee: 1 },
+        321: { completed: 1 }
+      });
+    });
+
+    it('should adjust the value of the returned ticket in the store', () => {
+      expect(state.entities[312]).toEqual(assignedTicket);
+    });
+
+    it('should leave the other tickets in the store untouched', () => {
+      expect(state.entities[123]).toBe(originalState.entities[123]);
+      expect(state.entities[321]).toBe(originalState.entities[321]);
+    });
+
+    it('should leave the rest of the state unaffected', () => {
       expect(state.loading).toBe(originalState.loading);
-      expect(state.loaded).toBe(originalState.loaded);
-      expect(state.submitting).toBeFalsy();
-      expect(state.submitted).toBeTruthy();
-      expect(state.error).toBe(originalState.error);
-      // all previous IDs to still be there
-      const originalIdsFilteredByNewIds = (originalState.ids as number[]).filter(id =>
-        !(state.ids as number[]).includes(id)
-      );
-      expect(originalIdsFilteredByNewIds.length).toBe(0);
-
-      expect(state.entities).toEqual(jasmine.objectContaining({ [completedTicket.id]: completedTicket }));
+      expect(state.adding).toBe(originalState.adding);
     });
 
   });
 
   describe('CompleteError Action', () => {
 
-    it('should reflect that an error occurred', () => {
-      const errorMsg = 'test error message';
-      const error = new Error(errorMsg);
-      const action = new TicketCompleteError(error);
-      const originalState = createTicketState();
-      const state = ticketReducer(originalState, action);
+    const originalState = createTicketState({
+      submitting: {
+        123: { assignee: 1 },
+        321: { completed: 1 },
+        312: { assignee: 1, completed: 1 }
+      },
+      entities: {
+        123: createTicket({id: 123}),
+        321: createTicket({id: 321}),
+        312: createTicket({id: 312})
+      },
+      ids: [123, 321, 312]
+    });
+    const errorMsg = 'test error';
+    const error = new Error(errorMsg);
+    const action = new TicketCompleteError(312, error);
+    const state = ticketReducer(originalState, action);
 
-      expect(state.loading).toBe(originalState.loading);
-      expect(state.loaded).toBe(originalState.loaded);
-      expect(state.submitting).toBeFalsy();
-      expect(state.submitted).toBeFalsy();
+    it('should put the error message into the store', () => {
       expect(state.error).toBe(errorMsg);
+    });
+
+    it('should decrease the submitting.completed value of the corresponding ticket', () => {
+      expect(state.submitting[312].completed).toBe(0);
+    });
+
+    it('should leave the submitting.assignee value for the ticket id untouched', () => {
+      expect(state.submitting[312].assignee).toBe(1);
+    });
+
+    it('should leave the rest of the submitting values the same', () => {
+      const submittingState = state.submitting;
+      delete submittingState[312];
+      expect(submittingState).toEqual({
+        123: { assignee: 1 },
+        321: { completed: 1 }
+      });
+    });
+
+    it('should leave the rest of the state unaffected', () => {
+      expect(state.loading).toBe(originalState.loading);
+      expect(state.adding).toBe(originalState.adding);
       expect(state.ids).toBe(originalState.ids);
       expect(state.entities).toBe(originalState.entities);
     });

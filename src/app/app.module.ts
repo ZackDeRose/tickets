@@ -73,7 +73,7 @@ import { CreateTicketDialogComponent } from './components/create-ticket-dialog/c
     BackendService,
     {
       provide: DATA_INTERVAL_DURATION,
-      useValue: 15000
+      useValue: 30000
     }
   ],
   bootstrap: [AppComponent],

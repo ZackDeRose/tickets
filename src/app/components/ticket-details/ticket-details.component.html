@@ -2,13 +2,14 @@
   *ngIf="loading$ | async"
   mode="indeterminate"
   value="50"
-  class="card-progress">
+  class="card-progress"
+  color="warn">
 </mat-progress-bar>
-<mat-card class="detail-card">
+<mat-card class="detail-card" *ngIf="ticket$ | async">
   <mat-card-header>
     <div mat-card-avatar class="avatar">
-      <button *ngIf="submitting$ | async; else completedIcon" mat-icon-button disabled="true" class="spinning">
-        <mat-icon svgIcon="loading" class="avatar-icon"></mat-icon>
+      <button *ngIf="(completing$ | async); else completedIcon" mat-icon-button disabled="true" class="spinning">
+        <mat-icon svgIcon="loading" class="avatar-icon" color="warn"></mat-icon>
       </button>
       <ng-template #completedIcon>
         <button mat-icon-button (click)="complete()">
@@ -26,10 +27,17 @@
   <mat-card-content>
     <p *ngIf="user$ | async">
       <strong>Assigned To: </strong>
-      {{ (user$ | async).name }} 
-      <button mat-icon-button color="primary" (click)="openAssigneeDialog()">
-        <mat-icon svgIcon="edit"></mat-icon>
-      </button>
+      <span *ngIf="!(assigning$ | async); else spinning">
+        {{ (user$ | async).name }} 
+        <button mat-icon-button color="primary" (click)="openAssigneeDialog()">
+          <mat-icon svgIcon="edit"></mat-icon>
+        </button>
+      </span>
+      <ng-template #spinning>
+        <button mat-icon-button disabled="true" class="spinning">
+          <mat-icon svgIcon="loading" color="warn"></mat-icon>
+        </button>
+      </ng-template>
     </p>
     <p *ngIf="!(user$ | async) && !(userLoading$ | async)">
       <strong>Currently Unassigned</strong>
@@ -42,6 +50,7 @@
   <mat-card-actions>
     <button *ngIf="ticket$ | async"
             mat-raised-button
+            color="accent"
             routerLink="/ticket-list">
       Back to Ticket List
     </button>

@@ -4,7 +4,7 @@ import { MatIconRegistry, MatDialog } from '@angular/material';
 import { Component, OnInit } from '@angular/core';
 import { Observable, combineLatest } from 'rxjs';
 import { map, switchMap, filter, take, tap } from 'rxjs/operators';
-import { Ticket, User } from 'tickets-data-layer';
+import { Ticket, User, ticketAssigning, ticketCompleting } from 'tickets-data-layer';
 import { Store, select } from '@ngrx/store';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -26,7 +26,8 @@ export class TicketDetailsComponent implements OnInit {
   ticket$: Observable<Ticket>;
   user$: Observable<User>;
   loading$: Observable<boolean>;
-  submitting$: Observable<boolean>;
+  assigning$: Observable<boolean>;
+  completing$: Observable<boolean>;
 
   constructor(
     private store$: Store<any>,
@@ -42,12 +43,6 @@ export class TicketDetailsComponent implements OnInit {
   }
 
   ngOnInit() {
-    // const id = await this.route.paramMap.pipe(
-    //   map(params => params.get('id')),
-    //   take(1)
-    // ).toPromise();
-    // .subscribe(id => this.store$.dispatch(new TicketDetailsInit(Number(id))));
-
     this.ticket$ = this.route.paramMap.pipe(
       map(params => params.get('id')),
       switchMap(id => this.store$.pipe(
@@ -67,15 +62,25 @@ export class TicketDetailsComponent implements OnInit {
 
     this.loading$ = combineLatest(
       this.store$.pipe(select(ticketsLoading)),
-      this.store$.pipe(select(ticketsSubmitting)),
       this.store$.pipe(select(usersLoading)),
-      this.store$.pipe(select(usersSubmitting))
     )
     .pipe(
-      map(arr => arr.some(x => !!x))
+      map(arr => arr.some(x => x > 0))
     );
 
-    this.submitting$ = this.store$.pipe(select(ticketsSubmitting));
+    this.assigning$ = this.ticket$.pipe(
+      filter(ticket => ticket != null),
+      switchMap(ticket => this.store$.pipe(
+        select(ticketAssigning(ticket.id))
+      ))
+    );
+
+    this.completing$ = this.ticket$.pipe(
+      filter(ticket => ticket != null),
+      switchMap(ticket => this.store$.pipe(
+        select(ticketCompleting(ticket.id))
+      ))
+    );
   }
 
   async complete() {

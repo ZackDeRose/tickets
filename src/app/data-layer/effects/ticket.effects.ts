@@ -89,7 +89,7 @@ export class TicketEffects {
           map(ticket => new TicketCompleteSuccess(ticket))
         );
       } catch (error) {
-        toReturn = of(new TicketCompleteError(error));
+        toReturn = of(new TicketCompleteError(action.ticketId, error));
       }
       return toReturn;
     })
@@ -105,7 +105,7 @@ export class TicketEffects {
           map(ticket => new TicketAssignSuccess(ticket)),
         );
       } catch (error) {
-        toReturn = of(new TicketAssignError(error));
+        toReturn = of(new TicketAssignError(action.ticketId, error));
       }
       return toReturn;
     })

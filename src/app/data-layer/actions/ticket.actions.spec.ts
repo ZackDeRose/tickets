@@ -90,10 +90,12 @@ describe('Ticket Actions', () => {
   it('should create TicketAssignError action', () => {
     const errorMsg = 'test error message';
     const error = new Error(errorMsg);
-    const action = new TicketAssignError(error);
+    const ticketId = 0;
+    const action = new TicketAssignError(ticketId, error);
 
     expect(action.type).toBe(TicketActionTypes.AssignError);
     expect(action.error).toBe(error);
+    expect(action.ticketId).toBe(ticketId);
   });
 
   it('should create TicketRequestComplete action', () => {
@@ -117,10 +119,12 @@ describe('Ticket Actions', () => {
   it('should create TicketCompleteError action', () => {
     const errorMsg = 'test error message';
     const error = new Error(errorMsg);
-    const action = new TicketCompleteError(error);
+    const ticketId = 0;
+    const action = new TicketCompleteError(ticketId, error);
 
     expect(action.type).toBe(TicketActionTypes.CompleteError);
     expect(action.error).toBe(error);
+    expect(action.ticketId).toBe(ticketId);
   });
 
 });

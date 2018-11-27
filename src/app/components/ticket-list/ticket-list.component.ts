@@ -1,17 +1,20 @@
+import { Dictionary } from '@ngrx/entity';
 import { FormControl } from '@angular/forms';
 import { EditAssigneeDialogComponent } from './../edit-assignee-dialog/edit-assignee-dialog.component';
-import { TicketListInit, TicketListAlterCompleted } from './ticket-list.actions';
+import { TicketListAlterCompleted } from './ticket-list.actions';
 import { CreateTicketDialogComponent } from './../create-ticket-dialog/create-ticket-dialog.component';
-import { tap, map, startWith, switchMap, take } from 'rxjs/operators';
+import { map, startWith, switchMap, take } from 'rxjs/operators';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Store, createSelector, select } from '@ngrx/store';
 import {
   selectUserEntities,
   usersLoading,
-  usersSubmitting,
+  ticketCompleting,
   selectTicketEntities,
   ticketsLoading,
-  ticketsSubmitting
+  ticketsSubmitting,
+  TicketPendingChanges,
+  ticketAssigning
 } from 'tickets-data-layer';
 import { Observable, combineLatest } from 'rxjs';
 import { MatIconRegistry, MatDialog, MatSort, SortDirection, PageEvent, MatPaginator } from '@angular/material';
@@ -123,15 +126,17 @@ export class TicketListComponent implements OnInit {
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
+  tableState$: Observable<TableState>;
   tableData$: Observable<TicketTableModel[]>;
   filteredTableData$: Observable<TicketTableModel[]>;
   refinedTableData$: Observable<TicketTableModel[]>;
-  columns = columns;
-  initialized = false;
   loading$: Observable<boolean>;
-  submitting$: Observable<boolean>;
-  tableState$: Observable<TableState>;
+  submitting$: Observable<Dictionary<TicketPendingChanges>>;
   globalSearch = new FormControl('');
+  columns = columns;
+  select = select;
+  ticketCompleting = ticketCompleting;
+  ticketAssigning = ticketAssigning;
 
   constructor(
     private store$: Store<any>,
@@ -176,19 +181,16 @@ export class TicketListComponent implements OnInit {
 
     this.refinedTableData$ = this.tableState$.pipe(
       switchMap(tableState => this.store$.pipe(
-        select(refinedTableData(tableState)),
-        tap(() => this.initialized = true)
+        select(refinedTableData(tableState))
       ))
     );
 
     this.loading$ = combineLatest(
       this.store$.pipe(select(ticketsLoading)),
-      this.store$.pipe(select(ticketsSubmitting)),
-      this.store$.pipe(select(usersLoading)),
-      this.store$.pipe(select(usersSubmitting)),
+      this.store$.pipe(select(usersLoading))
     )
     .pipe(
-      map(arr => arr.some(working => !!working))
+      map(([ticketLoading, userLoading]) => ticketLoading > 0 || userLoading)
     );
 
     this.submitting$ = this.store$.pipe(select(ticketsSubmitting));

@@ -65,7 +65,7 @@ export class TicketAssignSuccess implements Action {
 export class TicketAssignError implements Action {
   readonly type = TicketActionTypes.AssignError;
 
-  constructor(public error: Error) {}
+  constructor(public ticketId, public error: Error) {}
 }
 
 export class TicketRequestComplete implements Action {
@@ -83,7 +83,7 @@ export class TicketCompleteSuccess implements Action {
 export class TicketCompleteError implements Action {
   readonly type = TicketActionTypes.CompleteError;
 
-  constructor(public error: Error) {}
+  constructor(public ticketId, public error: Error) {}
 }
 
 export type TicketActions =

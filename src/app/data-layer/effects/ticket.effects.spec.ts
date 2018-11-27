@@ -253,7 +253,7 @@ describe('Ticket Effects', () => {
       service.complete.and.throwError(errorMsg);
 
       const expected = cold('a', {
-        a: new TicketCompleteError(error)
+        a: new TicketCompleteError(ticket.id, error)
       });
 
       const effects = new TicketEffects(new Actions(source), service);
@@ -280,7 +280,7 @@ describe('Ticket Effects', () => {
       });
 
       const expected = cold('a-b', {
-        a: new TicketCompleteError(error),
+        a: new TicketCompleteError(ticket.id, error),
         b: new TicketCompleteSuccess({ ...ticket, completed: !ticket.completed })
       });
 
@@ -333,7 +333,7 @@ describe('Ticket Effects', () => {
       service.assign.and.throwError(errorMsg);
 
       const expected = cold('a', {
-        a: new TicketAssignError(error)
+        a: new TicketAssignError(ticket.id, error)
       });
 
       const effects = new TicketEffects(new Actions(source), service);
@@ -362,7 +362,7 @@ describe('Ticket Effects', () => {
       });
 
       const expected = cold('a-b', {
-        a: new TicketAssignError(error),
+        a: new TicketAssignError(ticket.id, error),
         b: new TicketAssignSuccess(assignedTicket)
       });
 

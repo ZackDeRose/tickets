@@ -1,3 +1,4 @@
+import { ticketsAdding } from './../../data-layer/reducers/ticket.reducer';
 import { DomSanitizer } from '@angular/platform-browser';
 import { TicketListCreateNew } from './../ticket-list/ticket-list.actions';
 import { take, startWith, switchMap, map } from 'rxjs/operators';
@@ -31,7 +32,7 @@ export class CreateTicketDialogComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.submitting$ = this.store$.pipe(select(ticketsSubmitting));
+    this.submitting$ = this.store$.pipe(select(ticketsAdding), map(adding => adding > 0));
     this.canSubmit$ = this.descriptionForm.valueChanges.pipe(
       startWith(this.descriptionForm.value),
       switchMap(formValue => this.submitting$.pipe(
@@ -41,16 +42,17 @@ export class CreateTicketDialogComponent implements OnInit {
   }
 
   submit() {
-    this.actions$.pipe(
-      ofType(TicketActionTypes.AddSuccess),
-      take(1)
-    )
-    .subscribe(() => this.dialogRef.close());
+    this.closeDialogOnNextAddSuccess();
 
     this.store$.dispatch(new TicketListCreateNew(this.descriptionForm.value));
   }
 
   cancel() {
+    this.dialogRef.close();
+  }
+
+  private async closeDialogOnNextAddSuccess() {
+    await this.actions$.pipe(ofType(TicketActionTypes.AddSuccess), take(1)).toPromise();
     this.dialogRef.close();
   }
 
