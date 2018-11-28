@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { delay, tap } from 'rxjs/operators';
-import { Ticket, User } from 'tickets-data-layer';
+import { Ticket, User } from './data-layer';
 
 // *** NOTE: moved User and Ticket to data-layer.models ***
 

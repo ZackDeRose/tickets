@@ -12,10 +12,10 @@ import {
   TicketAddError,
 } from './../actions/ticket.actions';
 import { initialTicketState, ticketReducer } from './ticket.reducer';
-import { TicketActions, TicketRequestLoad } from 'tickets-data-layer/actions';
+import { TicketActions, TicketRequestLoad } from '../actions';
 import { createTicketState, testTickets, createTicket } from 'testing-utils';
 import { Dictionary } from '@ngrx/entity';
-import { Ticket } from 'tickets-data-layer/models';
+import { Ticket } from '../models';
 
 describe('TicketReducer', () => {
 

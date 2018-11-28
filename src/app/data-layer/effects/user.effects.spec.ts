@@ -6,9 +6,9 @@ import { cold } from 'jasmine-marbles';
 import { BackendService } from '../../backend.service';
 import {
   UserActionTypes,
-  UserLoadSuccess
-} from 'tickets-data-layer/actions';
-import { UserLoadError } from 'tickets-data-layer/actions';
+  UserLoadSuccess,
+  UserLoadError
+} from '../actions';
 
 describe('User Effects', () => {
 

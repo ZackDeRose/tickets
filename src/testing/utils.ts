@@ -1,5 +1,4 @@
-import { DataLayerState } from 'tickets-data-layer/reducers';
-import { Ticket, User, TicketState, UserState } from 'tickets-data-layer';
+import { Ticket, User, TicketState, UserState, DataLayerState } from '../app/data-layer';
 import { Dictionary } from '@ngrx/entity';
 
 export const createTicket: (x?: Partial<Ticket>) => Ticket = ({

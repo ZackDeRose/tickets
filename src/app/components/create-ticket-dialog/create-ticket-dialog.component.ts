@@ -8,7 +8,7 @@ import { Store, select } from '@ngrx/store';
 import { MatDialogRef, MatIconRegistry } from '@angular/material';
 import { FormControl, Validators } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
-import { ticketsSubmitting, TicketActionTypes } from 'tickets-data-layer';
+import { ticketsSubmitting, TicketActionTypes } from '../../data-layer';
 
 @Component({
   selector: 'app-create-ticket-dialog',

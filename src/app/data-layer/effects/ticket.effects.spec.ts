@@ -16,7 +16,7 @@ import {
   TicketRequestAssign,
   TicketAssignError,
   UserRequestLoad
-} from 'tickets-data-layer/actions';
+} from '../actions';
 import { Actions } from '@ngrx/effects';
 import { testTickets, createTicket, createUser } from 'testing-utils';
 import { of } from 'rxjs';

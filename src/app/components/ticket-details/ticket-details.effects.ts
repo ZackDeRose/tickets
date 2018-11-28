@@ -5,7 +5,7 @@ import {
   TicketDetailsAlterCompleted,
   TicketDetailsEditAssignee
 } from './ticket-details.actions';
-import { TicketRequestComplete, TicketRequestAssign } from 'tickets-data-layer';
+import { TicketRequestComplete, TicketRequestAssign } from '../../data-layer';
 import { Injectable } from '@angular/core';
 
 @Injectable()

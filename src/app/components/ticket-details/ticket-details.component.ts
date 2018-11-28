@@ -4,17 +4,18 @@ import { MatIconRegistry, MatDialog } from '@angular/material';
 import { Component, OnInit } from '@angular/core';
 import { Observable, combineLatest } from 'rxjs';
 import { map, switchMap, filter, take, tap } from 'rxjs/operators';
-import { Ticket, User, ticketAssigning, ticketCompleting } from 'tickets-data-layer';
 import { Store, select } from '@ngrx/store';
 import { ActivatedRoute } from '@angular/router';
 import {
   selectTicketEntities,
   selectUserEntities,
-  usersSubmitting,
   usersLoading,
   ticketsLoading,
-  ticketsSubmitting
-} from 'tickets-data-layer';
+  Ticket,
+  User,
+  ticketAssigning,
+  ticketCompleting
+} from '../../data-layer';
 import { EditAssigneeDialogComponent } from '../edit-assignee-dialog/edit-assignee-dialog.component';
 
 @Component({

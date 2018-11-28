@@ -1,6 +1,6 @@
 import { createEntityAdapter, EntityState, Dictionary } from '@ngrx/entity';
-import { Ticket } from 'tickets-data-layer/models';
-import { TicketActions, TicketActionTypes } from 'tickets-data-layer/actions';
+import { Ticket } from '../models';
+import { TicketActions, TicketActionTypes } from '../actions';
 import { createSelector } from '@ngrx/store';
 import { dataLayerSelector } from './data-layer.state';
 

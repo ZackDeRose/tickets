@@ -15,7 +15,7 @@ import {
   selectTicketEntities,
   ticketAssigning,
   selectUserEntities
-} from 'tickets-data-layer';
+} from '../../data-layer';
 import { FormControl, Validators } from '@angular/forms';
 import { Observable, combineLatest } from 'rxjs';
 

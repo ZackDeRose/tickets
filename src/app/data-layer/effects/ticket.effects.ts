@@ -16,10 +16,10 @@ import {
   TicketAssignSuccess
 } from '../actions/ticket.actions';
 import { Observable, of, timer } from 'rxjs';
-import { switchMap, map, concatMap, mergeMap, mapTo } from 'rxjs/operators';
+import { switchMap, map, mergeMap } from 'rxjs/operators';
 import { Effect, Actions, ofType } from '@ngrx/effects';
 import { BackendService } from '../../backend.service';
-import { UserRequestLoad } from 'tickets-data-layer/actions';
+import { UserRequestLoad } from '../actions';
 
 @Injectable()
 export class TicketEffects {

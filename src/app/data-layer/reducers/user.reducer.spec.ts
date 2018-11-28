@@ -1,4 +1,4 @@
-import { User } from 'tickets-data-layer/models';
+import { User } from '../models';
 import { Dictionary } from '@ngrx/entity';
 import { userReducer, initialUserState } from './user.reducer';
 import {
@@ -6,7 +6,7 @@ import {
   UserRequestLoad,
   UserLoadSuccess,
   UserLoadError
-} from 'tickets-data-layer/actions';
+} from '../actions';
 import { createUserState, testUsers, createUser } from 'testing-utils';
 
 describe('UserReducer', () => {

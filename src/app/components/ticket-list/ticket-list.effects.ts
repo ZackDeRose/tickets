@@ -1,14 +1,17 @@
-import { map, switchMap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import {
   TicketListActionTypes,
   TicketListCreateNew,
-  TicketListInit,
   TicketListEditAssignee,
   TicketListAlterCompleted
 } from './ticket-list.actions';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { TicketRequestAdd, TicketRequestLoad, UserRequestLoad, TicketRequestAssign, TicketRequestComplete } from 'tickets-data-layer';
+import {
+  TicketRequestAdd,
+  TicketRequestAssign,
+  TicketRequestComplete
+} from '../../data-layer';
 
 @Injectable()
 export class TicketListEffects {

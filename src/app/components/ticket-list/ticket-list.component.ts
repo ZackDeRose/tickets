@@ -15,7 +15,7 @@ import {
   ticketsSubmitting,
   TicketPendingChanges,
   ticketAssigning
-} from 'tickets-data-layer';
+} from '../../data-layer';
 import { Observable, combineLatest } from 'rxjs';
 import { MatIconRegistry, MatDialog, MatSort, SortDirection, PageEvent, MatPaginator } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
