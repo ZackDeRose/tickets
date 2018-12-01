@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
-import { delay, tap } from 'rxjs/operators';
+import { delay, tap, map } from 'rxjs/operators';
 import { Ticket, User } from './data-layer';
 
 // *** NOTE: moved User and Ticket to data-layer.models ***
@@ -23,6 +23,24 @@ export class BackendService {
       description: 'Move the desk to the new location',
       assigneeId: 111,
       completed: false
+    },
+    {
+      id: 2,
+      description: 'Unique',
+      assigneeId: 111,
+      completed: true
+    },
+    {
+      id: 3,
+      description: 'Not',
+      assigneeId: 111,
+      completed: true
+    },
+    {
+      id: 4,
+      description: 'Project X',
+      assigneeId: 111,
+      completed: true
     }
   ];
 
@@ -40,6 +58,24 @@ export class BackendService {
 
   tickets() {
     return of(this.storedTickets).pipe(delay(randomDelay()));
+  }
+
+  ticketsBy(filter: string, completedOnly = false) {
+    if (!filter) {
+      return completedOnly
+        ? of(this.storedTickets.filter(ticket => !!ticket.completed))
+        : of(this.storedTickets);
+    }
+    return of(this.storedTickets.filter(ticket => {
+      if (completedOnly) {
+        return ticket.description.toLowerCase().includes(filter.toLowerCase()) &&
+        ticket.completed;
+      }
+      return ticket.description.toLowerCase().includes(filter.toLowerCase());
+    }))
+    .pipe(
+      delay(randomDelay())
+    );
   }
 
   ticket(id: number): Observable<Ticket> {

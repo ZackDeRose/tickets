@@ -31,6 +31,7 @@ import { TicketDetailsEffects } from './components/ticket-details/ticket-details
 import { EditAssigneeDialogComponent } from './components/edit-assignee-dialog/edit-assignee-dialog.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CreateTicketDialogComponent } from './components/create-ticket-dialog/create-ticket-dialog.component';
+import { NewTableComponent } from './new-table/new-table.component';
 
 @NgModule({
   declarations: [
@@ -38,7 +39,8 @@ import { CreateTicketDialogComponent } from './components/create-ticket-dialog/c
     TicketListComponent,
     TicketDetailsComponent,
     EditAssigneeDialogComponent,
-    CreateTicketDialogComponent
+    CreateTicketDialogComponent,
+    NewTableComponent
   ],
   imports: [
     BrowserModule,

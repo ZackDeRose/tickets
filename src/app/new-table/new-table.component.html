@@ -1,0 +1,5 @@
+<input type="checkbox" [formControl]="completedOnly">
+<input type="text" [formControl]="filter">
+
+<pre>{{filter.value}}</pre>
+<pre>{{tableDataSource$ | async | json}}</pre>
