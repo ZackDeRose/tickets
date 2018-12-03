@@ -18,7 +18,7 @@ export const createTicket: (x?: Partial<Ticket>) => Ticket = ({
   completed
 });
 
-export const createUser: (x?: User) => User = ({
+export const createUser: (x?: Partial<User>) => User = ({
   id = 0,
   name = 'Zack'
 } = {

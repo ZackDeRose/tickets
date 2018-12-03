@@ -1,6 +1,6 @@
 import { TicketEffects } from './ticket.effects';
 import { BackendService } from '../../backend.service';
-import { cold } from 'jasmine-marbles';
+import { cold, hot } from 'jasmine-marbles';
 import {
   TicketActionTypes,
   TicketLoadSuccess,
@@ -40,8 +40,8 @@ describe('Ticket Effects', () => {
   describe('timer', () => {
 
     it('should emit a RequestTicketLoad action on app load', () => {
-      const source = cold('-');
-      const expected = cold('(ab)', { a: new TicketRequestLoad(), b: new UserRequestLoad() });
+      const source = hot('-');
+      const expected = hot('(ab)', { a: new TicketRequestLoad(), b: new UserRequestLoad() });
 
       const effects = new TicketEffects(new Actions(source), service, 20);
 
@@ -49,9 +49,10 @@ describe('Ticket Effects', () => {
     });
 
     it('should continue to emit a RequestTicketLoad action at an interval that matches the injected interval', () => {
-      const expected = cold('(ab)-(ab)-(ab)-(ab)-(ab)', { a: new TicketRequestLoad(), b: new UserRequestLoad() });
+      const source = hot('---------');
+      const expected = hot('(ab)-(ab)-(ab)-(ab)-(ab)', { a: new TicketRequestLoad(), b: new UserRequestLoad() });
 
-      const effects = new TicketEffects(new Actions(), service, 20);
+      const effects = new TicketEffects(new Actions(source), service, 20);
 
       expect(effects.timer$).toBeObservable(expected); // nothing emits from effects.timer$ :( FAILS
     });
